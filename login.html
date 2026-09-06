@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AeroMRO | Login</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body class="login-page">
+
+
+    <nav class="navbar">
+
+        <a href="index.html" class="brand brand-link">
+
+            <div class="brand-icon">A</div>
+
+            <div>
+                <h1>AeroMRO</h1>
+                <span>AVIATION TRAINING PLATFORM</span>
+            </div>
+
+        </a>
+
+
+        <div class="nav-status">
+
+            <span class="status-dot"></span>
+
+            Demo Environment
+
+        </div>
+
+    </nav>
+
+
+
+    <main class="login-container">
+
+
+        <section class="login-panel">
+
+
+            <div class="login-header">
+
+                <div class="badge" id="modeBadge">
+                    MAINTENANCE WORKSPACE
+                </div>
+
+                <h2 id="loginTitle">
+                    Select your role
+                </h2>
+
+                <p id="loginDescription">
+                    Choose a role to enter the AeroMRO training environment.
+                </p>
+
+            </div>
+
+
+
+            <div id="roleContainer" class="role-grid"></div>
+
+
+
+            <div class="selected-role-box">
+
+                <span>Selected role</span>
+
+                <strong id="selectedRole">
+                    None
+                </strong>
+
+            </div>
+
+
+
+            <div class="login-form">
+
+                <label>
+                    Name
+                </label>
+
+                <input
+                    id="userName"
+                    type="text"
+                    placeholder="Enter your name"
+                >
+
+
+                <label>
+                    Training ID
+                </label>
+
+                <input
+                    id="trainingId"
+                    type="text"
+                    placeholder="Example: AVT4902-01"
+                >
+
+
+                <button
+                    id="continueButton"
+                    class="login-button"
+                    onclick="continueLogin()"
+                    disabled
+                >
+
+                    Continue to AeroMRO
+
+                    <span>→</span>
+
+                </button>
+
+            </div>
+
+
+
+            <div class="simulation-warning">
+
+                <strong>Training / Simulation Environment</strong>
+
+                <p>
+                    AeroMRO does not contain approved aircraft
+                    maintenance data and must not be used for
+                    real maintenance activity.
+                </p>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <script>
+
+
+        const params =
+            new URLSearchParams(window.location.search);
+
+
+        const mode =
+            params.get("mode") || "maintenance";
+
+
+        let selectedRole = null;
+
+
+
+        const maintenanceRoles = [
+
+            {
+                id: "admin",
+                icon: "🗂️",
+                title: "Admin / Planner",
+                description:
+                    "Create job cards, assign personnel and monitor workflow."
+            },
+
+            {
+                id: "mechanic",
+                icon: "🔧",
+                title: "Mechanic / AME",
+                description:
+                    "Perform simulated maintenance tasks and submit evidence."
+            },
+
+            {
+                id: "inspector",
+                icon: "🔍",
+                title: "Inspector / QA",
+                description:
+                    "Review completed work, identify discrepancies and sign off."
+            }
+
+        ];
+
+
+
+        const trainingRoles = [
+
+            {
+                id: "student",
+                icon: "🎓",
+                title: "Student / Trainee",
+                description:
+                    "Study aircraft systems, complete scenarios and track progress."
+            }
+
+        ];
+
+
+
+        function loadMode() {
+
+            const roleContainer =
+                document.getElementById("roleContainer");
+
+
+            const modeBadge =
+                document.getElementById("modeBadge");
+
+
+            const loginTitle =
+                document.getElementById("loginTitle");
+
+
+            const loginDescription =
+                document.getElementById("loginDescription");
+
+
+            let roles;
+
+
+            if (mode === "training") {
+
+                roles = trainingRoles;
+
+                modeBadge.innerText =
+                    "TRAINING ACADEMY";
+
+                loginTitle.innerText =
+                    "Enter Training Academy";
+
+                loginDescription.innerText =
+                    "Select your training profile to begin interactive aircraft systems learning.";
+
+            }
+
+            else {
+
+                roles = maintenanceRoles;
+
+                modeBadge.innerText =
+                    "MAINTENANCE WORKSPACE";
+
+                loginTitle.innerText =
+                    "Select your maintenance role";
+
+                loginDescription.innerText =
+                    "Choose a role to enter the simulated aircraft maintenance workflow.";
+
+            }
+
+
+
+            roleContainer.innerHTML = "";
+
+
+            roles.forEach(role => {
+
+                const card =
+                    document.createElement("button");
+
+
+                card.className =
+                    "role-card";
+
+
+                card.innerHTML = `
+
+                    <div class="role-icon">
+                        ${role.icon}
+                    </div>
+
+                    <h3>
+                        ${role.title}
+                    </h3>
+
+                    <p>
+                        ${role.description}
+                    </p>
+
+                `;
+
+
+                card.onclick =
+                    () => selectRole(role, card);
+
+
+                roleContainer.appendChild(card);
+
+            });
+
+
+            if (roles.length === 1) {
+
+                const card =
+                    roleContainer.querySelector(".role-card");
+
+
+                selectRole(
+                    roles[0],
+                    card
+                );
+
+            }
+
+        }
+
+
+
+        function selectRole(role, card) {
+
+            selectedRole = role;
+
+
+            document
+                .querySelectorAll(".role-card")
+                .forEach(item =>
+                    item.classList.remove("selected")
+                );
+
+
+            card.classList.add("selected");
+
+
+            document.getElementById(
+                "selectedRole"
+            ).innerText =
+                role.title;
+
+
+            document.getElementById(
+                "continueButton"
+            ).disabled =
+                false;
+
+        }
+
+
+
+        function continueLogin() {
+
+            const userName =
+                document
+                    .getElementById("userName")
+                    .value
+                    .trim();
+
+
+            const trainingId =
+                document
+                    .getElementById("trainingId")
+                    .value
+                    .trim();
+
+
+            if (!userName) {
+
+                alert("Please enter your name.");
+
+                return;
+
+            }
+
+
+            if (!selectedRole) {
+
+                alert("Please select a role.");
+
+                return;
+
+            }
+
+
+
+            sessionStorage.setItem(
+                "aeromro_name",
+                userName
+            );
+
+
+            sessionStorage.setItem(
+                "aeromro_id",
+                trainingId
+            );
+
+
+            sessionStorage.setItem(
+                "aeromro_role",
+                selectedRole.id
+            );
+
+
+            sessionStorage.setItem(
+                "aeromro_role_title",
+                selectedRole.title
+            );
+
+
+            sessionStorage.setItem(
+                "aeromro_mode",
+                mode
+            );
+
+
+
+            /*
+                Dashboard will be created next.
+            */
+
+            window.location.href =
+                "dashboard.html";
+
+        }
+
+
+
+        loadMode();
+
+
+    </script>
+
+
+</body>
+
+</html>
