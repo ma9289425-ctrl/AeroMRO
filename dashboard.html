@@ -7,7 +7,7 @@
 
     <title>AeroMRO | Dashboard</title>
 
-    <link rel="stylesheet" href="./style.css?v=20260906-2">
+    <link rel="stylesheet" href="./style.css?v=20260906-3">
 </head>
 
 <body class="dashboard-page">
@@ -78,17 +78,17 @@
                     MAINTENANCE
                 </div>
 
-                <button class="sidebar-link">
+                <button class="sidebar-link" onclick="window.location.href='job-card.html'">
                     <span>▤</span>
                     Job Cards
                 </button>
 
-                <button class="sidebar-link">
+                <button class="sidebar-link" onclick="window.location.href='job-card.html'">
                     <span>✓</span>
                     Inspections
                 </button>
 
-                <button class="sidebar-link">
+                <button class="sidebar-link" onclick="window.location.href='job-card.html'">
                     <span>◷</span>
                     Audit Trail
                 </button>
@@ -236,7 +236,7 @@
                             <h3>Recent Activity</h3>
                         </div>
 
-                        <button class="small-panel-button">
+                        <button class="small-panel-button" onclick="window.location.href='job-card.html'">
                             View All
                         </button>
 
@@ -547,6 +547,7 @@ const roleData = {
             {
                 icon: "🔧",
                 title: "Open Assigned Jobs",
+                target: "job-card.html",
                 description:
                     "Review maintenance tasks assigned to your profile."
             },
@@ -554,6 +555,7 @@ const roleData = {
             {
                 icon: "📷",
                 title: "Submit Evidence",
+                target: "job-card.html",
                 description:
                     "Record training evidence and task completion information."
             },
@@ -612,6 +614,7 @@ const roleData = {
             {
                 icon: "🔍",
                 title: "Inspection Queue",
+                target: "job-card.html",
                 description:
                     "Review job cards submitted by mechanics."
             },
@@ -619,6 +622,7 @@ const roleData = {
             {
                 icon: "⚠",
                 title: "Record Discrepancy",
+                target: "job-card.html",
                 description:
                     "Record simulated inspection findings and comments."
             },
@@ -626,6 +630,7 @@ const roleData = {
             {
                 icon: "✓",
                 title: "Review Sign-Off",
+                target: "job-card.html",
                 description:
                     "Approve compliant simulated maintenance work."
             }
@@ -840,10 +845,13 @@ currentRole.actions.forEach(action => {
     `;
 
 
-    item.onclick =
-        () => showDashboardModal(
-            action.title
-        );
+    item.onclick = () => {
+        if (action.target) {
+            window.location.href = action.target;
+        } else {
+            showDashboardModal(action.title);
+        }
+    };
 
 
     actionGrid.appendChild(item);
