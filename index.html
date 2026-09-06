@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AeroMRO | Aviation Maintenance & Training</title>
+
+    <meta name="description"
+          content="AeroMRO is an integrated aircraft maintenance workflow and aviation training simulation platform.">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =========================
+         NAVIGATION
+    ========================== -->
+    <nav class="navbar">
+
+        <div class="brand">
+            <div class="brand-icon">A</div>
+
+            <div>
+                <h1>AeroMRO</h1>
+                <span>AVIATION TRAINING PLATFORM</span>
+            </div>
+        </div>
+
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            Training Environment
+        </div>
+
+    </nav>
+
+
+    <!-- =========================
+         HERO
+    ========================== -->
+    <main class="hero">
+
+        <div class="hero-content">
+
+            <div class="badge">
+                AVT 4902 • GRADUATION PROJECT
+            </div>
+
+            <h2>
+                Aircraft Maintenance.
+                <span>Reimagined for Training.</span>
+            </h2>
+
+            <p class="hero-description">
+                An integrated web-based platform combining simulated
+                aircraft maintenance workflows with interactive technical
+                training and AI-assisted learning.
+            </p>
+
+
+            <!-- =========================
+                 TWO MAIN MODES
+            ========================== -->
+            <div class="mode-grid">
+
+                <!-- MAINTENANCE -->
+                <article class="mode-card maintenance-card">
+
+                    <div class="card-top">
+
+                        <div class="mode-icon">
+                            🔧
+                        </div>
+
+                        <div class="card-status">
+                            CORE MODULE
+                        </div>
+
+                    </div>
+
+                    <h3>Maintenance Workspace</h3>
+
+                    <p>
+                        Simulate the complete maintenance workflow from
+                        task assignment to mechanic execution and
+                        inspector approval.
+                    </p>
+
+                    <div class="feature-list">
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Digital Job Cards
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Mechanic Task Execution
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Evidence & Photo Records
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            QA Inspection
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Immutable Audit Trail
+                        </div>
+
+                    </div>
+
+                    <button class="primary-button" onclick="comingSoon('Maintenance Workspace')">
+                        Enter Workspace
+                        <span>→</span>
+                    </button>
+
+                </article>
+
+
+                <!-- TRAINING -->
+                <article class="mode-card training-card">
+
+                    <div class="card-top">
+
+                        <div class="mode-icon">
+                            🎓
+                        </div>
+
+                        <div class="card-status training">
+                            INTELLIGENT LEARNING
+                        </div>
+
+                    </div>
+
+                    <h3>Training Academy</h3>
+
+                    <p>
+                        Explore aircraft systems through interactive
+                        lessons, technical scenarios, assessments,
+                        and intelligent learning support.
+                    </p>
+
+                    <div class="feature-list">
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Aircraft Systems
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Interactive Diagrams
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Troubleshooting Scenarios
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Quizzes & Assessment
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            AI-Assisted Learning
+                        </div>
+
+                    </div>
+
+                    <button class="secondary-button" onclick="comingSoon('Training Academy')">
+                        Start Training
+                        <span>→</span>
+                    </button>
+
+                </article>
+
+            </div>
+
+
+            <!-- =========================
+                 CONNECTION SECTION
+            ========================== -->
+            <section class="integration">
+
+                <div class="integration-label">
+                    INTEGRATED LEARNING LOOP
+                </div>
+
+                <div class="workflow">
+
+                    <div class="workflow-item">
+                        <div class="workflow-number">01</div>
+                        <strong>Perform</strong>
+                        <span>Complete simulated maintenance tasks</span>
+                    </div>
+
+                    <div class="workflow-arrow">→</div>
+
+                    <div class="workflow-item">
+                        <div class="workflow-number">02</div>
+                        <strong>Inspect</strong>
+                        <span>Receive QA feedback and discrepancies</span>
+                    </div>
+
+                    <div class="workflow-arrow">→</div>
+
+                    <div class="workflow-item">
+                        <div class="workflow-number">03</div>
+                        <strong>Learn</strong>
+                        <span>Access related technical training</span>
+                    </div>
+
+                    <div class="workflow-arrow">→</div>
+
+                    <div class="workflow-item">
+                        <div class="workflow-number">04</div>
+                        <strong>Improve</strong>
+                        <span>Retry tasks with improved knowledge</span>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+    <footer>
+
+        <div>
+            <strong>AeroMRO</strong>
+            <span> • Training & Simulation Platform</span>
+        </div>
+
+        <p>
+            Educational simulation only — not approved aircraft maintenance data.
+        </p>
+
+    </footer>
+
+
+    <!-- =========================
+         SIMPLE TEMPORARY POPUP
+    ========================== -->
+    <div id="modal" class="modal">
+
+        <div class="modal-box">
+
+            <div class="modal-icon">✈</div>
+
+            <h3 id="modal-title">Module</h3>
+
+            <p>
+                This module is currently under development.
+                It will become available in the next AeroMRO build.
+            </p>
+
+            <button onclick="closeModal()">Close</button>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        function comingSoon(moduleName) {
+
+            document.getElementById("modal-title").innerText = moduleName;
+
+            document.getElementById("modal").classList.add("active");
+
+        }
+
+
+        function closeModal() {
+
+            document.getElementById("modal").classList.remove("active");
+
+        }
+
+    </script>
+
+</body>
+</html>
