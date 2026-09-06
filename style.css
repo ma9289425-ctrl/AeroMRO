@@ -721,6 +721,11 @@ footer strong {
 }
 
 
+.button-link {
+    text-decoration: none;
+    color: inherit;
+}
+
 /* ===================================
    MOBILE
 =================================== */
@@ -787,9 +792,7 @@ footer strong {
 
         text-align: center;
     }
-.button-link {
-    text-decoration: none;
-}
+
 }
 /* ===================================
    LOGIN PAGE
@@ -2391,4 +2394,33 @@ footer strong {
 
     }
 
+}
+
+/* ===================================
+   DASHBOARD HARDENING
+   Added to ensure dashboard controls
+   never fall back to browser defaults.
+=================================== */
+
+.dashboard-page button,
+.dashboard-page input,
+.dashboard-page select,
+.dashboard-page textarea {
+    font: inherit;
+}
+
+.dashboard-page button {
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.dashboard-topbar,
+.dashboard-layout,
+.dashboard-sidebar,
+.dashboard-main {
+    width: 100%;
+}
+
+.dashboard-layout {
+    align-items: stretch;
 }
