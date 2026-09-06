@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AeroMRO | Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dashboard-page">
+
+    <!-- ===============================
+         TOP BAR
+    ================================ -->
+    <header class="dashboard-topbar">
+
+        <a href="index.html" class="brand brand-link">
+
+            <div class="brand-icon">A</div>
+
+            <div>
+                <h1>AeroMRO</h1>
+                <span>AVIATION TRAINING PLATFORM</span>
+            </div>
+
+        </a>
+
+
+        <div class="dashboard-user">
+
+            <div class="dashboard-user-info">
+
+                <strong id="topUserName">User</strong>
+
+                <span id="topUserRole">Role</span>
+
+            </div>
+
+            <div class="user-avatar" id="userAvatar">
+                U
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ===============================
+         LAYOUT
+    ================================ -->
+    <div class="dashboard-layout">
+
+
+        <!-- ===========================
+             SIDEBAR
+        ============================ -->
+        <aside class="dashboard-sidebar">
+
+            <div class="sidebar-section-label">
+                MAIN
+            </div>
+
+            <button class="sidebar-link active">
+                <span>▦</span>
+                Dashboard
+            </button>
+
+
+            <div
+                id="maintenanceMenu"
+                class="sidebar-menu-section"
+            >
+
+                <div class="sidebar-section-label">
+                    MAINTENANCE
+                </div>
+
+                <button class="sidebar-link">
+                    <span>▤</span>
+                    Job Cards
+                </button>
+
+                <button class="sidebar-link">
+                    <span>✓</span>
+                    Inspections
+                </button>
+
+                <button class="sidebar-link">
+                    <span>◷</span>
+                    Audit Trail
+                </button>
+
+            </div>
+
+
+            <div
+                id="trainingMenu"
+                class="sidebar-menu-section"
+            >
+
+                <div class="sidebar-section-label">
+                    TRAINING
+                </div>
+
+                <button class="sidebar-link">
+                    <span>◉</span>
+                    Aircraft Systems
+                </button>
+
+                <button class="sidebar-link">
+                    <span>⚠</span>
+                    Troubleshooting
+                </button>
+
+                <button class="sidebar-link">
+                    <span>✦</span>
+                    AI Tutor
+                </button>
+
+                <button class="sidebar-link">
+                    <span>◎</span>
+                    Assessments
+                </button>
+
+            </div>
+
+
+            <div class="sidebar-bottom">
+
+                <button
+                    class="sidebar-link logout-link"
+                    onclick="logout()"
+                >
+                    <span>←</span>
+                    Exit Platform
+                </button>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- ===========================
+             MAIN CONTENT
+        ============================ -->
+        <main class="dashboard-main">
+
+
+            <!-- WELCOME -->
+            <section class="dashboard-welcome">
+
+                <div>
+
+                    <div
+                        id="environmentBadge"
+                        class="dashboard-badge"
+                    >
+                        AEROMRO
+                    </div>
+
+                    <h2>
+                        Welcome,
+                        <span id="welcomeName">User</span>
+                    </h2>
+
+                    <p id="welcomeDescription">
+                        Your AeroMRO training environment is ready.
+                    </p>
+
+                </div>
+
+
+                <div class="environment-status">
+
+                    <span class="status-dot"></span>
+
+                    <div>
+                        <strong>System Online</strong>
+                        <span>Training environment</span>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =======================
+                 STAT CARDS
+            ======================== -->
+            <section
+                id="statsGrid"
+                class="dashboard-stats"
+            >
+            </section>
+
+
+
+            <!-- =======================
+                 QUICK ACTIONS
+            ======================== -->
+            <div class="dashboard-section-title">
+
+                <div>
+                    <span>WORKSPACE</span>
+                    <h3>Quick Actions</h3>
+                </div>
+
+            </div>
+
+
+            <section
+                id="actionGrid"
+                class="dashboard-actions"
+            >
+            </section>
+
+
+
+            <!-- =======================
+                 ACTIVITY
+            ======================== -->
+            <section class="dashboard-bottom-grid">
+
+
+                <article class="dashboard-panel">
+
+                    <div class="panel-heading">
+
+                        <div>
+                            <span>ACTIVITY</span>
+                            <h3>Recent Activity</h3>
+                        </div>
+
+                        <button class="small-panel-button">
+                            View All
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="activityList"
+                        class="activity-list"
+                    >
+                    </div>
+
+                </article>
+
+
+
+                <article class="dashboard-panel">
+
+                    <div class="panel-heading">
+
+                        <div>
+                            <span>LEARNING</span>
+                            <h3>Recommended Training</h3>
+                        </div>
+
+                    </div>
+
+
+                    <div class="training-recommendation">
+
+                        <div class="recommendation-icon">
+                            💧
+                        </div>
+
+                        <div>
+
+                            <span class="training-category">
+                                ATA 29
+                            </span>
+
+                            <h4>
+                                Aircraft Hydraulic Power
+                            </h4>
+
+                            <p>
+                                Learn hydraulic system fundamentals,
+                                components, pressure distribution
+                                and troubleshooting concepts.
+                            </p>
+
+                            <div class="training-progress">
+
+                                <div class="progress-line">
+                                    <span style="width: 35%"></span>
+                                </div>
+
+                                <small>
+                                    Module preparation: 35%
+                                </small>
+
+                            </div>
+
+                            <button
+                                class="training-open-button"
+                                onclick="moduleComingSoon()"
+                            >
+                                Open Training Module →
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+            </section>
+
+
+
+            <!-- =======================
+                 SIMULATION NOTICE
+            ======================== -->
+            <section class="dashboard-notice">
+
+                <div>⚠</div>
+
+                <div>
+
+                    <strong>
+                        Training & Simulation Environment
+                    </strong>
+
+                    <p>
+                        AeroMRO is designed for education and simulation.
+                        It does not replace approved aircraft maintenance
+                        manuals, procedures, or authorized maintenance data.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+
+
+    <!-- ===============================
+         TEMP MODAL
+    ================================ -->
+    <div id="dashboardModal" class="modal">
+
+        <div class="modal-box">
+
+            <div class="modal-icon">
+                ✈
+            </div>
+
+            <h3 id="dashboardModalTitle">
+                Module
+            </h3>
+
+            <p id="dashboardModalText">
+                This feature will be developed in the next AeroMRO build.
+            </p>
+
+            <button onclick="closeDashboardModal()">
+                Close
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+<script>
+
+/* ==================================
+   USER SESSION
+================================== */
+
+const userName =
+    sessionStorage.getItem("aeromro_name");
+
+const userRole =
+    sessionStorage.getItem("aeromro_role");
+
+const roleTitle =
+    sessionStorage.getItem("aeromro_role_title");
+
+const mode =
+    sessionStorage.getItem("aeromro_mode");
+
+
+/*
+If user did not enter through login,
+return them to home.
+*/
+
+if (!userName || !userRole) {
+
+    window.location.href = "index.html";
+
+}
+
+
+
+/* ==================================
+   USER INFORMATION
+================================== */
+
+document.getElementById(
+    "topUserName"
+).innerText = userName;
+
+
+document.getElementById(
+    "topUserRole"
+).innerText = roleTitle;
+
+
+document.getElementById(
+    "welcomeName"
+).innerText = userName;
+
+
+document.getElementById(
+    "userAvatar"
+).innerText =
+    userName.charAt(0).toUpperCase();
+
+
+
+/* ==================================
+   ROLE DATA
+================================== */
+
+const roleData = {
+
+
+    admin: {
+
+        badge:
+            "ADMIN / PLANNER",
+
+        description:
+            "Manage simulated maintenance tasks, personnel assignments and workflow activity.",
+
+        stats: [
+
+            {
+                label: "Active Job Cards",
+                value: "08",
+                icon: "▤"
+            },
+
+            {
+                label: "Assigned Tasks",
+                value: "05",
+                icon: "⚙"
+            },
+
+            {
+                label: "Pending Inspection",
+                value: "03",
+                icon: "◷"
+            },
+
+            {
+                label: "Completion Rate",
+                value: "76%",
+                icon: "✓"
+            }
+
+        ],
+
+        actions: [
+
+            {
+                icon: "＋",
+                title: "Create Job Card",
+                description:
+                    "Create and assign a simulated maintenance task."
+            },
+
+            {
+                icon: "👤",
+                title: "Assign Personnel",
+                description:
+                    "Assign mechanics and inspectors to training tasks."
+            },
+
+            {
+                icon: "▦",
+                title: "Monitor Workflow",
+                description:
+                    "Track job progress across the maintenance workspace."
+            }
+
+        ]
+
+    },
+
+
+
+    mechanic: {
+
+        badge:
+            "MECHANIC / AME",
+
+        description:
+            "Review assigned maintenance tasks, record evidence and submit completed work for inspection.",
+
+        stats: [
+
+            {
+                label: "Assigned Jobs",
+                value: "04",
+                icon: "▤"
+            },
+
+            {
+                label: "In Progress",
+                value: "02",
+                icon: "⚙"
+            },
+
+            {
+                label: "Awaiting QA",
+                value: "01",
+                icon: "◷"
+            },
+
+            {
+                label: "Training Score",
+                value: "86%",
+                icon: "★"
+            }
+
+        ],
+
+        actions: [
+
+            {
+                icon: "🔧",
+                title: "Open Assigned Jobs",
+                description:
+                    "Review maintenance tasks assigned to your profile."
+            },
+
+            {
+                icon: "📷",
+                title: "Submit Evidence",
+                description:
+                    "Record training evidence and task completion information."
+            },
+
+            {
+                icon: "🎓",
+                title: "Technical Training",
+                description:
+                    "Open training related to aircraft systems and maintenance."
+            }
+
+        ]
+
+    },
+
+
+
+    inspector: {
+
+        badge:
+            "INSPECTOR / QA",
+
+        description:
+            "Review completed simulated work, identify discrepancies and approve or return job cards.",
+
+        stats: [
+
+            {
+                label: "Pending Reviews",
+                value: "03",
+                icon: "🔍"
+            },
+
+            {
+                label: "Approved Today",
+                value: "07",
+                icon: "✓"
+            },
+
+            {
+                label: "Returned",
+                value: "02",
+                icon: "↩"
+            },
+
+            {
+                label: "Inspection Rate",
+                value: "91%",
+                icon: "◎"
+            }
+
+        ],
+
+        actions: [
+
+            {
+                icon: "🔍",
+                title: "Inspection Queue",
+                description:
+                    "Review job cards submitted by mechanics."
+            },
+
+            {
+                icon: "⚠",
+                title: "Record Discrepancy",
+                description:
+                    "Record simulated inspection findings and comments."
+            },
+
+            {
+                icon: "✓",
+                title: "Review Sign-Off",
+                description:
+                    "Approve compliant simulated maintenance work."
+            }
+
+        ]
+
+    },
+
+
+
+    student: {
+
+        badge:
+            "TRAINING ACADEMY",
+
+        description:
+            "Develop aircraft system knowledge through interactive learning, troubleshooting and assessment.",
+
+        stats: [
+
+            {
+                label: "Modules",
+                value: "04",
+                icon: "◉"
+            },
+
+            {
+                label: "Completed",
+                value: "01",
+                icon: "✓"
+            },
+
+            {
+                label: "Average Score",
+                value: "84%",
+                icon: "★"
+            },
+
+            {
+                label: "Scenarios",
+                value: "06",
+                icon: "⚠"
+            }
+
+        ],
+
+        actions: [
+
+            {
+                icon: "💧",
+                title: "Aircraft Systems",
+                description:
+                    "Explore interactive aviation system learning modules."
+            },
+
+            {
+                icon: "⚠",
+                title: "Troubleshooting",
+                description:
+                    "Practice technical fault and maintenance scenarios."
+            },
+
+            {
+                icon: "✦",
+                title: "AI Tutor",
+                description:
+                    "Ask technical questions and receive educational guidance."
+            }
+
+        ]
+
+    }
+
+};
+
+
+
+/* ==================================
+   LOAD ROLE
+================================== */
+
+const currentRole =
+    roleData[userRole];
+
+
+document.getElementById(
+    "environmentBadge"
+).innerText =
+    currentRole.badge;
+
+
+document.getElementById(
+    "welcomeDescription"
+).innerText =
+    currentRole.description;
+
+
+
+/* ==================================
+   MENU VISIBILITY
+================================== */
+
+if (mode === "training") {
+
+    document.getElementById(
+        "maintenanceMenu"
+    ).style.display =
+        "none";
+
+}
+
+else {
+
+    document.getElementById(
+        "trainingMenu"
+    ).style.display =
+        "block";
+
+}
+
+
+
+/* ==================================
+   RENDER STATS
+================================== */
+
+const statsGrid =
+    document.getElementById("statsGrid");
+
+
+currentRole.stats.forEach(stat => {
+
+    const item =
+        document.createElement("article");
+
+
+    item.className =
+        "dashboard-stat-card";
+
+
+    item.innerHTML = `
+
+        <div class="stat-top">
+
+            <span class="stat-label">
+                ${stat.label}
+            </span>
+
+            <div class="stat-icon">
+                ${stat.icon}
+            </div>
+
+        </div>
+
+        <strong class="stat-value">
+            ${stat.value}
+        </strong>
+
+        <span class="stat-subtext">
+            Demo training data
+        </span>
+
+    `;
+
+
+    statsGrid.appendChild(item);
+
+});
+
+
+
+/* ==================================
+   RENDER ACTIONS
+================================== */
+
+const actionGrid =
+    document.getElementById("actionGrid");
+
+
+currentRole.actions.forEach(action => {
+
+    const item =
+        document.createElement("button");
+
+
+    item.className =
+        "dashboard-action-card";
+
+
+    item.innerHTML = `
+
+        <div class="action-icon">
+            ${action.icon}
+        </div>
+
+        <div>
+
+            <h4>
+                ${action.title}
+            </h4>
+
+            <p>
+                ${action.description}
+            </p>
+
+        </div>
+
+        <span class="action-arrow">
+            →
+        </span>
+
+    `;
+
+
+    item.onclick =
+        () => showDashboardModal(
+            action.title
+        );
+
+
+    actionGrid.appendChild(item);
+
+});
+
+
+
+/* ==================================
+   ACTIVITY
+================================== */
+
+const activities = [
+
+    {
+        icon: "✓",
+        title: "Training environment initialized",
+        time: "Just now",
+        type: "success"
+    },
+
+    {
+        icon: "▤",
+        title: "Demo job card JC-001 available",
+        time: "Today",
+        type: "normal"
+    },
+
+    {
+        icon: "🎓",
+        title: "ATA 29 Hydraulic training prepared",
+        time: "Today",
+        type: "training"
+    }
+
+];
+
+
+const activityList =
+    document.getElementById(
+        "activityList"
+    );
+
+
+activities.forEach(activity => {
+
+    const row =
+        document.createElement("div");
+
+
+    row.className =
+        "activity-row";
+
+
+    row.innerHTML = `
+
+        <div class="activity-icon ${activity.type}">
+            ${activity.icon}
+        </div>
+
+        <div class="activity-content">
+
+            <strong>
+                ${activity.title}
+            </strong>
+
+            <span>
+                ${activity.time}
+            </span>
+
+        </div>
+
+    `;
+
+
+    activityList.appendChild(row);
+
+});
+
+
+
+/* ==================================
+   TEMP MODAL
+================================== */
+
+function showDashboardModal(title) {
+
+    document.getElementById(
+        "dashboardModalTitle"
+    ).innerText =
+        title;
+
+
+    document.getElementById(
+        "dashboardModal"
+    ).classList.add("active");
+
+}
+
+
+function closeDashboardModal() {
+
+    document.getElementById(
+        "dashboardModal"
+    ).classList.remove("active");
+
+}
+
+
+function moduleComingSoon() {
+
+    showDashboardModal(
+        "Aircraft Hydraulic Power — ATA 29"
+    );
+
+}
+
+
+
+/* ==================================
+   LOGOUT
+================================== */
+
+function logout() {
+
+    sessionStorage.clear();
+
+    window.location.href =
+        "index.html";
+
+}
+
+</script>
+
+
+</body>
+</html>
