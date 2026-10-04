@@ -134,6 +134,16 @@
     .pl-table th:first-child, .pl-table td:first-child { text-align: left; }
     .pl-table td { text-align: right; padding: 10px; color: #c8d6e0; font-size: 9px; border-bottom: 1px solid rgba(255,255,255,.04); }
     .pl-table tr:hover td { background: rgba(66,165,255,.025); }
+    .pl-table tr.pl-excluded td { opacity: .48; }
+    .pl-use-tag { display:inline-flex; align-items:center; justify-content:center; min-width:58px; padding:4px 7px; border-radius:999px; font-size:7px; font-weight:900; letter-spacing:.45px; }
+    .pl-use-tag.keep { color:#65e7b1; background:rgba(67,214,156,.09); border:1px solid rgba(67,214,156,.16); }
+    .pl-use-tag.drop { color:#f0b270; background:rgba(245,166,91,.08); border:1px solid rgba(245,166,91,.15); }
+
+    .pl-analysis-controls { margin-top:14px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid rgba(255,255,255,.055); border-radius:11px; background:rgba(255,255,255,.02); }
+    .pl-check { display:flex; align-items:center; gap:9px; color:#a9bbc8; font-size:9px; font-weight:800; cursor:pointer; }
+    .pl-check input { width:16px; height:16px; accent-color:var(--pl-blue); }
+    .pl-analysis-controls small { color:#71899b; font-size:8px; line-height:1.45; max-width:520px; }
+
 
     .pl-chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
     .pl-chart-card { min-height: 320px; padding: 14px; border: 1px solid rgba(255,255,255,.055); border-radius: 13px; background: rgba(255,255,255,.018); }
@@ -190,9 +200,9 @@
 
     <section class="pl-hero">
       <div>
-        <span class="pl-kicker">AEROMRO PROPLAB • VERSION 0.1</span>
+        <span class="pl-kicker">AEROMRO PROPLAB • VERSION 0.2</span>
         <h1>Propeller Performance Analysis</h1>
-        <p>Import RCbenchmark Excel/CSV test data, standardise the required measurements, inspect the source mapping, and visualise static propeller performance. This first release focuses on a reliable source-data-to-analysis workflow before multi-propeller selection is added.</p>
+        <p>Import RCbenchmark Excel/CSV test data, standardise the required measurements, inspect the source mapping, and visualise static propeller performance. Version 0.2 adds transient-aware analysis and corrected power-domain plotting before multi-propeller selection is added.</p>
       </div>
       <div class="pl-flow">
         <span>BASELINE DATA FLOW</span>
@@ -266,11 +276,18 @@
                 <div class="pl-info-box"><span>Detected Sheet</span><strong id="sourceSheet">—</strong></div>
                 <div class="pl-info-box"><span>RPM Mapping</span><strong id="mapRpm">—</strong></div>
                 <div class="pl-info-box"><span>Thrust Mapping</span><strong id="mapThrust">—</strong></div>
+                <div class="pl-info-box"><span>Analysis Points</span><strong id="analysisPoints">—</strong></div>
+                <div class="pl-info-box"><span>Transient Handling</span><strong id="filterInfo">—</strong></div>
+              </div>
+
+              <div class="pl-analysis-controls">
+                <label class="pl-check"><input id="filterTransients" type="checkbox" checked /> Exclude obvious shutdown/transient samples from analysis charts</label>
+                <small>PropLab only removes high-RPM samples with implausibly low power/current relative to the same run. Raw rows remain visible and are never deleted.</small>
               </div>
 
               <div class="pl-table-wrap">
                 <table class="pl-table">
-                  <thead><tr><th>#</th><th>RPM</th><th>Thrust (N)</th><th>Voltage (V)</th><th>Current (A)</th><th>Elec. Power (W)</th><th>Torque (N·m)</th><th>T/P (N/W)</th></tr></thead>
+                  <thead><tr><th>#</th><th>RPM</th><th>Thrust (N)</th><th>Voltage (V)</th><th>Current (A)</th><th>Elec. Power (W)</th><th>Torque (N·m)</th><th>T/P (N/W)</th><th>Use</th></tr></thead>
                   <tbody id="dataTableBody"></tbody>
                 </table>
               </div>
@@ -301,6 +318,7 @@
             <div class="pl-status" id="statusLibrary"><div class="pl-status-dot"></div><div><strong>Parser ready</strong><p>Waiting for an Excel/CSV file.</p></div></div>
             <div class="pl-status" id="statusMapping"><div class="pl-status-dot"></div><div><strong>Field mapping</strong><p>No measurement fields detected yet.</p></div></div>
             <div class="pl-status" id="statusRows"><div class="pl-status-dot"></div><div><strong>Measurement rows</strong><p>No valid rows loaded yet.</p></div></div>
+            <div class="pl-status" id="statusQuality"><div class="pl-status-dot"></div><div><strong>Analysis filter</strong><p>Waiting for test data.</p></div></div>
           </div>
         </section>
 
@@ -562,8 +580,51 @@
     renderAnalysis();
   }
 
-  function sortedRows() {
-    return [...currentRows].sort((a,b) => a.rpm - b.rpm);
+  function sortedRows(rows = currentRows) {
+    return [...rows].sort((a,b) => a.rpm - b.rpm);
+  }
+
+  function classifyAnalysisRows(rows) {
+    const finiteRpm = rows.map(r => r.rpm).filter(Number.isFinite);
+    const finitePower = rows.map(r => r.electricalPower).filter(v => Number.isFinite(v) && v >= 0);
+    const finiteCurrent = rows.map(r => r.current).filter(v => Number.isFinite(v) && v >= 0);
+    const maxRpm = finiteRpm.length ? Math.max(...finiteRpm) : 0;
+    const maxPower = finitePower.length ? Math.max(...finitePower) : 0;
+    const maxCurrent = finiteCurrent.length ? Math.max(...finiteCurrent) : 0;
+
+    return rows.map((row, i) => {
+      let excluded = false;
+      let reason = '';
+      const highRpm = maxRpm > 0 && row.rpm >= 0.80 * maxRpm;
+      const veryLowPower = Number.isFinite(row.electricalPower) && maxPower > 0 && row.electricalPower <= Math.max(2, 0.15 * maxPower);
+      const veryLowCurrent = Number.isFinite(row.current) && maxCurrent > 0 && row.current <= Math.max(0.10, 0.15 * maxCurrent);
+
+      if (highRpm && (veryLowPower || veryLowCurrent)) {
+        excluded = true;
+        reason = 'High RPM with collapsed power/current (shutdown/transient candidate)';
+      }
+
+      if (!excluded && i > 0) {
+        const prev = rows[i - 1];
+        const similarRpm = Number.isFinite(prev.rpm) && row.rpm > 0 && Math.abs(row.rpm - prev.rpm) / row.rpm <= 0.03;
+        const powerCollapse = Number.isFinite(prev.electricalPower) && prev.electricalPower > 0 && Number.isFinite(row.electricalPower) && row.electricalPower < 0.35 * prev.electricalPower;
+        const currentCollapse = Number.isFinite(prev.current) && prev.current > 0 && Number.isFinite(row.current) && row.current < 0.35 * prev.current;
+        if (highRpm && similarRpm && (powerCollapse || currentCollapse)) {
+          excluded = true;
+          reason = 'Abrupt electrical collapse at nearly unchanged RPM';
+        }
+      }
+
+      return { ...row, _excluded: excluded, _excludeReason: reason };
+    });
+  }
+
+  function getAnalysisState() {
+    const classified = classifyAnalysisRows(currentRows);
+    const filterOn = el('filterTransients') ? el('filterTransients').checked : true;
+    const analysisRows = filterOn ? classified.filter(r => !r._excluded) : classified;
+    const excludedCount = classified.filter(r => r._excluded).length;
+    return { classified, analysisRows, excludedCount, filterOn };
   }
 
   function renderAnalysis() {
@@ -578,10 +639,13 @@
     el('analysisBadge').style.color = hasData ? '#61e1ad' : '#70879a';
     if (!hasData) return;
 
-    const rows = sortedRows();
-    const maxRpm = Math.max(...rows.map(r => r.rpm));
-    const maxThrust = Math.max(...rows.map(r => r.thrustN));
-    const powers = rows.map(r => r.electricalPower).filter(Number.isFinite);
+    const state = getAnalysisState();
+    const rows = sortedRows(state.classified);
+    const analysisRows = sortedRows(state.analysisRows);
+    const metricRows = analysisRows.length ? analysisRows : rows;
+    const maxRpm = Math.max(...metricRows.map(r => r.rpm));
+    const maxThrust = Math.max(...metricRows.map(r => r.thrustN));
+    const powers = metricRows.map(r => r.electricalPower).filter(Number.isFinite);
     const maxPower = powers.length ? Math.max(...powers) : NaN;
 
     el('metricRows').textContent = rows.length;
@@ -592,16 +656,33 @@
     el('sourceSheet').textContent = currentSource.sheet || '—';
     el('mapRpm').textContent = currentSource.mappings.rpm || '—';
     el('mapThrust').textContent = currentSource.mappings.thrust || '—';
+    el('analysisPoints').textContent = `${analysisRows.length} / ${rows.length}`;
+    el('filterInfo').textContent = state.filterOn
+      ? `${state.excludedCount} transient candidate${state.excludedCount === 1 ? '' : 's'} excluded from charts`
+      : `Filter off — all ${rows.length} points used`;
+
+    setStatus(
+      'statusQuality',
+      state.excludedCount && state.filterOn ? 'warn' : 'ok',
+      state.filterOn ? 'Transient-aware analysis' : 'Raw analysis mode',
+      state.filterOn
+        ? `${state.excludedCount} obvious shutdown/transient candidate${state.excludedCount === 1 ? '' : 's'} excluded from charts; raw rows retained.`
+        : 'All imported rows are currently included in the charts.'
+    );
 
     const tbody = el('dataTableBody');
     tbody.innerHTML = '';
-    rows.slice(0, 120).forEach((r, i) => {
+    rows.slice(0, 140).forEach((r, i) => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${i+1}</td><td>${Math.round(r.rpm)}</td><td>${round(r.thrustN,3)}</td><td>${round(r.voltage,3)}</td><td>${round(r.current,3)}</td><td>${round(r.electricalPower,2)}</td><td>${round(r.torque,4)}</td><td>${round(r.thrustPerWatt,4)}</td>`;
+      if (r._excluded && state.filterOn) tr.className = 'pl-excluded';
+      const useLabel = r._excluded
+        ? `<span class="pl-use-tag drop" title="${escapeHtml(r._excludeReason)}">EXCLUDE</span>`
+        : '<span class="pl-use-tag keep">ANALYSIS</span>';
+      tr.innerHTML = `<td>${i+1}</td><td>${Math.round(r.rpm)}</td><td>${round(r.thrustN,3)}</td><td>${round(r.voltage,3)}</td><td>${round(r.current,3)}</td><td>${round(r.electricalPower,2)}</td><td>${round(r.torque,4)}</td><td>${round(r.thrustPerWatt,4)}</td><td>${useLabel}</td>`;
       tbody.appendChild(tr);
     });
 
-    renderCharts(rows);
+    renderCharts(analysisRows);
   }
 
   function destroyCharts() {
@@ -609,26 +690,67 @@
     charts = {};
   }
 
-  function chartOptions(xTitle, yTitle) {
+  function chartOptions(xTitle, yTitle, cleanPoints) {
+    const xs = cleanPoints.map(p => p.x).filter(Number.isFinite);
+    const ys = cleanPoints.map(p => p.y).filter(Number.isFinite);
+    const allXNonNegative = xs.length && xs.every(v => v >= 0);
+    const allYNonNegative = ys.length && ys.every(v => v >= 0);
+    const maxX = xs.length ? Math.max(...xs) : undefined;
+    const maxY = ys.length ? Math.max(...ys) : undefined;
+
     return {
       responsive: true,
       maintainAspectRatio: false,
       parsing: false,
       animation: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${round(ctx.parsed.y, 3)}` } } },
+      normalized: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` x: ${round(ctx.parsed.x, 3)}, y: ${round(ctx.parsed.y, 3)}`
+          }
+        }
+      },
       scales: {
-        x: { type: 'linear', title: { display: true, text: xTitle, color: '#758da0' }, ticks: { color: '#758da0', maxTicksLimit: 7 }, grid: { color: 'rgba(255,255,255,.04)' } },
-        y: { title: { display: true, text: yTitle, color: '#758da0' }, ticks: { color: '#758da0', maxTicksLimit: 7 }, grid: { color: 'rgba(255,255,255,.04)' } }
+        x: {
+          type: 'linear',
+          min: allXNonNegative ? 0 : undefined,
+          suggestedMax: Number.isFinite(maxX) ? maxX * 1.05 : undefined,
+          title: { display: true, text: xTitle, color: '#758da0' },
+          ticks: { color: '#758da0', maxTicksLimit: 7 },
+          grid: { color: 'rgba(255,255,255,.04)' }
+        },
+        y: {
+          min: allYNonNegative ? 0 : undefined,
+          suggestedMax: Number.isFinite(maxY) ? maxY * 1.05 : undefined,
+          title: { display: true, text: yTitle, color: '#758da0' },
+          ticks: { color: '#758da0', maxTicksLimit: 7 },
+          grid: { color: 'rgba(255,255,255,.04)' }
+        }
       }
     };
   }
 
   function makeScatter(canvasId, points, xTitle, yTitle) {
-    const clean = points.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+    const clean = points
+      .filter(p => Number.isFinite(p.x) && Number.isFinite(p.y))
+      .map(p => ({ x: Number(p.x), y: Number(p.y) }))
+      .sort((a,b) => a.x - b.x);
+
     charts[canvasId] = new Chart(el(canvasId), {
       type: 'scatter',
-      data: { datasets: [{ data: clean, pointRadius: clean.length > 220 ? 1.4 : 2.5, pointHoverRadius: 4, showLine: true, borderWidth: 1.4 }] },
-      options: chartOptions(xTitle, yTitle)
+      data: {
+        datasets: [{
+          data: clean,
+          pointRadius: clean.length > 220 ? 1.4 : 2.5,
+          pointHoverRadius: 4,
+          showLine: true,
+          spanGaps: false,
+          borderWidth: 1.4
+        }]
+      },
+      options: chartOptions(xTitle, yTitle, clean)
     });
   }
 
@@ -689,11 +811,12 @@
 
   function exportCleanCsv() {
     if (!currentRows.length) return;
-    const headers = ['Test ID','Propeller ID','Diameter in','Pitch in','Source Row','RPM','Thrust N','Voltage V','Current A','Electrical Power W','Torque Nm','Thrust per Watt N/W'];
+    const headers = ['Test ID','Propeller ID','Diameter in','Pitch in','Source Row','RPM','Thrust N','Voltage V','Current A','Electrical Power W','Torque Nm','Thrust per Watt N/W','Analysis Use','Exclusion Reason'];
     const meta = [el('testId').value, el('propId').value, el('diameter').value, el('pitch').value];
     const lines = [headers.join(',')];
-    sortedRows().forEach(r => {
-      const row = [...meta, r.sourceRow, r.rpm, r.thrustN, r.voltage ?? '', r.current ?? '', r.electricalPower ?? '', r.torque ?? '', r.thrustPerWatt ?? ''];
+    const classified = classifyAnalysisRows(currentRows);
+    sortedRows(classified).forEach(r => {
+      const row = [...meta, r.sourceRow, r.rpm, r.thrustN, r.voltage ?? '', r.current ?? '', r.electricalPower ?? '', r.torque ?? '', r.thrustPerWatt ?? '', r._excluded ? 'Exclude transient candidate' : 'Analysis', r._excludeReason || ''];
       lines.push(row.map(csvEscape).join(','));
     });
     const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
@@ -724,6 +847,7 @@
     setStatus('statusLibrary', '', 'Parser ready', 'Waiting for an Excel/CSV file.');
     setStatus('statusMapping', '', 'Field mapping', 'No measurement fields detected yet.');
     setStatus('statusRows', '', 'Measurement rows', 'No valid rows loaded yet.');
+    setStatus('statusQuality', '', 'Analysis filter', 'Waiting for test data.');
   }
 
   el('fileInput').addEventListener('change', async e => {
@@ -741,6 +865,7 @@
   el('saveTest').addEventListener('click', saveCurrentTest);
   el('exportCsv').addEventListener('click', exportCleanCsv);
   el('resetTest').addEventListener('click', () => { if (confirm('Reset the current unsaved PropLab test?')) resetCurrent(); });
+  el('filterTransients').addEventListener('change', renderAnalysis);
 
   loadUser();
   renderHistory();
