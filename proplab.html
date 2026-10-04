@@ -1,1 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AeroMRO | PropLab</title>
+  <link rel="stylesheet" href="./style.css?v=20261004-1" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --pl-bg: #07111d;
+      --pl-panel: rgba(10, 25, 40, 0.88);
+      --pl-panel-2: rgba(14, 34, 53, 0.86);
+      --pl-border: rgba(255,255,255,.075);
+      --pl-text: #f7fbff;
+      --pl-muted: #8da2b4;
+      --pl-blue: #42a5ff;
+      --pl-green: #43d69c;
+      --pl-orange: #f5a65b;
+      --pl-red: #ff7272;
+    }
 
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--pl-bg); color: var(--pl-text); }
+    button, input, select { font: inherit; }
+
+    .pl-topbar {
+      min-height: 74px;
+      padding: 0 4%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--pl-border);
+      background: rgba(4, 12, 20, .96);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+    }
+
+    .pl-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; }
+    .pl-brand-mark {
+      width: 38px; height: 38px; border-radius: 11px;
+      display: grid; place-items: center; font-weight: 900;
+      background: linear-gradient(145deg, #1f8ff5, #56b4ff);
+      box-shadow: 0 8px 24px rgba(31,143,245,.2);
+    }
+    .pl-brand strong { display: block; font-size: 16px; }
+    .pl-brand span { display: block; color: #70889b; font-size: 9px; letter-spacing: 1.2px; margin-top: 2px; }
+    .pl-user { display: flex; align-items: center; gap: 11px; }
+    .pl-user-copy { text-align: right; }
+    .pl-user-copy strong { display: block; font-size: 11px; }
+    .pl-user-copy span { display: block; color: #7990a3; font-size: 9px; margin-top: 2px; }
+    .pl-avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: rgba(66,165,255,.12); border: 1px solid rgba(66,165,255,.25); color: #7cc4ff; font-weight: 800; }
+
+    .pl-shell { max-width: 1480px; margin: 0 auto; padding: 30px 4% 70px; }
+    .pl-back { display: inline-flex; align-items: center; gap: 8px; color: #91a7b8; text-decoration: none; font-size: 11px; padding: 10px 12px; border: 1px solid var(--pl-border); border-radius: 10px; background: rgba(255,255,255,.025); }
+
+    .pl-hero {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 1.45fr .55fr;
+      gap: 20px;
+      padding: 30px;
+      border: 1px solid var(--pl-border);
+      border-radius: 22px;
+      background: radial-gradient(circle at top right, rgba(66,165,255,.13), transparent 36%), linear-gradient(145deg, rgba(16,35,54,.96), rgba(7,18,30,.96));
+    }
+    .pl-kicker { color: #65b9ff; font-size: 10px; letter-spacing: 1.4px; font-weight: 900; }
+    .pl-hero h1 { margin: 8px 0 10px; font-size: clamp(32px, 5vw, 54px); line-height: 1.02; }
+    .pl-hero p { color: #9ab0c0; max-width: 850px; font-size: 13px; line-height: 1.65; margin: 0; }
+    .pl-flow { align-self: stretch; display: flex; flex-direction: column; justify-content: center; padding: 18px; border-radius: 16px; border: 1px solid rgba(66,165,255,.13); background: rgba(66,165,255,.035); }
+    .pl-flow span { color: #6f8799; font-size: 9px; font-weight: 800; letter-spacing: 1px; }
+    .pl-flow strong { margin-top: 8px; font-size: 13px; line-height: 1.55; }
+
+    .pl-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(330px, .75fr); gap: 20px; margin-top: 20px; }
+    .pl-stack { display: grid; gap: 20px; align-content: start; }
+    .pl-panel { border: 1px solid var(--pl-border); border-radius: 17px; background: var(--pl-panel); overflow: hidden; }
+    .pl-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,.055); }
+    .pl-panel-head span { display: block; color: #6f889b; font-size: 9px; letter-spacing: 1.25px; font-weight: 900; }
+    .pl-panel-head h2, .pl-panel-head h3 { margin: 4px 0 0; font-size: 18px; }
+    .pl-panel-body { padding: 20px; }
+
+    .pl-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .pl-field label { display: block; color: #879daf; font-size: 9px; font-weight: 800; margin-bottom: 7px; }
+    .pl-field input, .pl-field select {
+      width: 100%; border: 1px solid rgba(255,255,255,.08); border-radius: 10px;
+      background: rgba(4,13,22,.76); color: white; padding: 12px 13px; outline: none;
+      font-size: 11px;
+    }
+    .pl-field input:focus, .pl-field select:focus { border-color: rgba(66,165,255,.55); }
+    .pl-field.full { grid-column: 1 / -1; }
+
+    .pl-upload {
+      margin-top: 16px; padding: 22px; border: 1px dashed rgba(66,165,255,.33); border-radius: 14px; text-align: center;
+      background: rgba(66,165,255,.035);
+    }
+    .pl-upload strong { display: block; font-size: 13px; }
+    .pl-upload p { color: #7890a3; font-size: 9px; line-height: 1.5; margin: 7px auto 13px; max-width: 600px; }
+    .pl-upload input { max-width: 100%; color: #9fb2c1; font-size: 10px; }
+
+    .pl-button-row { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
+    .pl-btn { border: none; border-radius: 10px; padding: 11px 14px; font-size: 10px; font-weight: 850; cursor: pointer; }
+    .pl-btn.primary { background: linear-gradient(135deg, #278ff4, #51b0ff); color: white; }
+    .pl-btn.secondary { background: rgba(255,255,255,.05); color: #b5c5d1; border: 1px solid rgba(255,255,255,.07); }
+    .pl-btn.success { background: rgba(67,214,156,.13); color: #6aebb8; border: 1px solid rgba(67,214,156,.19); }
+    .pl-btn.danger { background: rgba(255,114,114,.09); color: #ff9999; border: 1px solid rgba(255,114,114,.17); }
+    .pl-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    .pl-status { display: flex; gap: 10px; align-items: flex-start; padding: 13px 14px; border-radius: 11px; border: 1px solid rgba(255,255,255,.065); background: rgba(255,255,255,.025); }
+    .pl-status + .pl-status { margin-top: 9px; }
+    .pl-status-dot { width: 9px; height: 9px; border-radius: 50%; background: #63798b; margin-top: 3px; box-shadow: 0 0 0 5px rgba(99,121,139,.08); }
+    .pl-status.ok .pl-status-dot { background: var(--pl-green); box-shadow: 0 0 0 5px rgba(67,214,156,.09); }
+    .pl-status.warn .pl-status-dot { background: var(--pl-orange); box-shadow: 0 0 0 5px rgba(245,166,91,.09); }
+    .pl-status.bad .pl-status-dot { background: var(--pl-red); box-shadow: 0 0 0 5px rgba(255,114,114,.09); }
+    .pl-status strong { display: block; font-size: 10px; }
+    .pl-status p { color: #7c93a6; font-size: 9px; line-height: 1.5; margin: 3px 0 0; }
+
+    .pl-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .pl-metric { padding: 14px; border: 1px solid rgba(255,255,255,.055); border-radius: 12px; background: rgba(255,255,255,.022); }
+    .pl-metric span { display: block; color: #6f8799; font-size: 8px; text-transform: uppercase; letter-spacing: .8px; }
+    .pl-metric strong { display: block; margin-top: 8px; font-size: 21px; }
+    .pl-metric small { color: #6f8799; font-size: 8px; }
+
+    .pl-data-info { margin-top: 14px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+    .pl-info-box { padding: 12px; border-radius: 10px; background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.05); }
+    .pl-info-box span { display:block; color:#6f8799; font-size:8px; text-transform:uppercase; letter-spacing:.7px; }
+    .pl-info-box strong { display:block; margin-top:5px; font-size:10px; word-break: break-word; }
+
+    .pl-table-wrap { margin-top: 16px; overflow: auto; max-height: 390px; border: 1px solid rgba(255,255,255,.055); border-radius: 12px; }
+    .pl-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    .pl-table th { position: sticky; top: 0; z-index: 2; background: #102235; color: #9bb0c0; text-align: right; font-size: 8px; text-transform: uppercase; letter-spacing: .55px; padding: 11px 10px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .pl-table th:first-child, .pl-table td:first-child { text-align: left; }
+    .pl-table td { text-align: right; padding: 10px; color: #c8d6e0; font-size: 9px; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .pl-table tr:hover td { background: rgba(66,165,255,.025); }
+
+    .pl-chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+    .pl-chart-card { min-height: 320px; padding: 14px; border: 1px solid rgba(255,255,255,.055); border-radius: 13px; background: rgba(255,255,255,.018); }
+    .pl-chart-title { font-size: 10px; font-weight: 800; margin-bottom: 9px; }
+    .pl-chart-wrap { position: relative; height: 270px; }
+
+    .pl-manual { display: none; margin-top: 16px; border-top: 1px solid rgba(255,255,255,.055); padding-top: 16px; }
+    .pl-manual.active { display: block; }
+    .pl-manual-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+    .pl-note { margin-top: 14px; padding: 13px 14px; border-radius: 11px; color: #8299aa; font-size: 9px; line-height: 1.55; background: rgba(245,166,91,.045); border: 1px solid rgba(245,166,91,.13); }
+    .pl-note strong { color: #efb475; }
+
+    .pl-empty { padding: 34px 20px; text-align: center; color: #70879a; font-size: 10px; }
+    .pl-empty strong { display: block; color: #a9bac7; font-size: 13px; margin-bottom: 5px; }
+
+    .pl-history { display: grid; gap: 9px; }
+    .pl-history-item { padding: 12px; border-radius: 11px; border: 1px solid rgba(255,255,255,.055); background: rgba(255,255,255,.02); }
+    .pl-history-item strong { display:block; font-size:10px; }
+    .pl-history-item span { display:block; margin-top:4px; color:#71899b; font-size:8px; line-height:1.5; }
+
+    .pl-next { display: grid; gap: 10px; }
+    .pl-next div { padding: 12px; border: 1px solid rgba(255,255,255,.05); border-radius: 10px; background: rgba(255,255,255,.02); color:#879daf; font-size:9px; line-height:1.5; }
+    .pl-next strong { color: white; }
+
+    @media (max-width: 1050px) {
+      .pl-hero, .pl-grid { grid-template-columns: 1fr; }
+      .pl-metrics { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .pl-shell { padding: 20px 16px 50px; }
+      .pl-topbar { padding: 0 16px; }
+      .pl-user-copy { display: none; }
+      .pl-hero { padding: 22px; }
+      .pl-form-grid, .pl-data-info, .pl-chart-grid, .pl-manual-grid { grid-template-columns: 1fr; }
+      .pl-metrics { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="pl-topbar">
+    <a class="pl-brand" href="index.html">
+      <div class="pl-brand-mark">A</div>
+      <div><strong>AeroMRO</strong><span>PROPLAB / EXPERIMENTAL ANALYSIS</span></div>
+    </a>
+    <div class="pl-user">
+      <div class="pl-user-copy"><strong id="userName">Demo User</strong><span id="userRole">Aviation Trainee</span></div>
+      <div class="pl-avatar" id="userAvatar">D</div>
+    </div>
+  </header>
+
+  <main class="pl-shell">
+    <a class="pl-back" href="dashboard.html">← Back to Dashboard</a>
+
+    <section class="pl-hero">
+      <div>
+        <span class="pl-kicker">AEROMRO PROPLAB • VERSION 0.1</span>
+        <h1>Propeller Performance Analysis</h1>
+        <p>Import RCbenchmark Excel/CSV test data, standardise the required measurements, inspect the source mapping, and visualise static propeller performance. This first release focuses on a reliable source-data-to-analysis workflow before multi-propeller selection is added.</p>
+      </div>
+      <div class="pl-flow">
+        <span>BASELINE DATA FLOW</span>
+        <strong>RCbenchmark Test Stand → GUI 1.2.1 → Excel/CSV → AeroMRO PropLab</strong>
+      </div>
+    </section>
+
+    <section class="pl-grid">
+      <div class="pl-stack">
+        <section class="pl-panel">
+          <div class="pl-panel-head">
+            <div><span>NEW TEST</span><h2>Test Information & Data Import</h2></div>
+            <button class="pl-btn secondary" id="manualToggle" type="button">Manual Entry</button>
+          </div>
+          <div class="pl-panel-body">
+            <div class="pl-form-grid">
+              <div class="pl-field"><label>Test ID</label><input id="testId" value="PT-001" /></div>
+              <div class="pl-field"><label>Propeller ID / Label</label><input id="propId" placeholder="e.g. 12145" /></div>
+              <div class="pl-field"><label>Diameter (in)</label><input id="diameter" type="number" step="0.1" placeholder="e.g. 12" /></div>
+              <div class="pl-field"><label>Pitch (in)</label><input id="pitch" type="number" step="0.1" placeholder="e.g. 14.5" /></div>
+              <div class="pl-field"><label>Motor / Setup</label><input id="motor" placeholder="Record when known" /></div>
+              <div class="pl-field"><label>Battery / Supply</label><input id="battery" placeholder="Record test configuration" /></div>
+              <div class="pl-field full"><label>Operator / Notes</label><input id="operatorNotes" placeholder="Operator, test condition, or short note" /></div>
+            </div>
+
+            <div class="pl-upload">
+              <strong>📊 Import RCbenchmark Excel / CSV</strong>
+              <p>Files are processed locally in your browser. The source file is not uploaded to GitHub or sent to a server by this prototype.</p>
+              <input id="fileInput" type="file" accept=".xlsx,.xls,.csv" />
+            </div>
+
+            <div class="pl-manual" id="manualPanel">
+              <div class="pl-manual-grid">
+                <div class="pl-field"><label>RPM</label><input id="mRpm" type="number" /></div>
+                <div class="pl-field"><label>Thrust (N)</label><input id="mThrust" type="number" step="0.001" /></div>
+                <div class="pl-field"><label>Voltage (V)</label><input id="mVoltage" type="number" step="0.001" /></div>
+                <div class="pl-field"><label>Current (A)</label><input id="mCurrent" type="number" step="0.001" /></div>
+                <div class="pl-field"><label>Electrical Power (W, optional)</label><input id="mPower" type="number" step="0.001" /></div>
+                <div class="pl-field"><label>Torque (N·m, optional)</label><input id="mTorque" type="number" step="0.0001" /></div>
+              </div>
+              <div class="pl-button-row"><button class="pl-btn success" type="button" id="addManualRow">+ Add Measurement</button></div>
+            </div>
+
+            <div class="pl-button-row">
+              <button class="pl-btn primary" id="saveTest" type="button" disabled>Save Test in Browser</button>
+              <button class="pl-btn secondary" id="exportCsv" type="button" disabled>Export Clean CSV</button>
+              <button class="pl-btn danger" id="resetTest" type="button">Reset Current Test</button>
+            </div>
+
+            <div class="pl-note"><strong>Engineering note:</strong> RCbenchmark raw exports may use a negative thrust sign convention. PropLab preserves the source interpretation and displays static thrust as a positive magnitude for comparison. If thrust is supplied in kgf, PropLab converts it to newtons using 1 kgf = 9.80665 N. Electrical power is read from the file when valid; otherwise it is calculated as V × I.</div>
+          </div>
+        </section>
+
+        <section class="pl-panel">
+          <div class="pl-panel-head">
+            <div><span>ANALYSIS</span><h2>Imported Test Summary</h2></div>
+            <div id="analysisBadge" style="font-size:9px;color:#70879a;">NO DATA</div>
+          </div>
+          <div class="pl-panel-body" id="analysisBody">
+            <div class="pl-empty" id="emptyAnalysis"><strong>No test data loaded</strong>Import an RCbenchmark Excel/CSV file or add manual measurements.</div>
+            <div id="analysisContent" style="display:none;">
+              <div class="pl-metrics">
+                <div class="pl-metric"><span>Valid Points</span><strong id="metricRows">0</strong><small>measurements</small></div>
+                <div class="pl-metric"><span>Max RPM</span><strong id="metricRpm">0</strong><small>rpm</small></div>
+                <div class="pl-metric"><span>Max Thrust</span><strong id="metricThrust">0</strong><small>N</small></div>
+                <div class="pl-metric"><span>Max Elec. Power</span><strong id="metricPower">0</strong><small>W</small></div>
+              </div>
+
+              <div class="pl-data-info">
+                <div class="pl-info-box"><span>Source File</span><strong id="sourceFile">—</strong></div>
+                <div class="pl-info-box"><span>Detected Sheet</span><strong id="sourceSheet">—</strong></div>
+                <div class="pl-info-box"><span>RPM Mapping</span><strong id="mapRpm">—</strong></div>
+                <div class="pl-info-box"><span>Thrust Mapping</span><strong id="mapThrust">—</strong></div>
+              </div>
+
+              <div class="pl-table-wrap">
+                <table class="pl-table">
+                  <thead><tr><th>#</th><th>RPM</th><th>Thrust (N)</th><th>Voltage (V)</th><th>Current (A)</th><th>Elec. Power (W)</th><th>Torque (N·m)</th><th>T/P (N/W)</th></tr></thead>
+                  <tbody id="dataTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="pl-panel">
+          <div class="pl-panel-head">
+            <div><span>PERFORMANCE PLOTS</span><h2>Static Test Visualisation</h2></div>
+          </div>
+          <div class="pl-panel-body">
+            <div class="pl-empty" id="chartEmpty"><strong>Charts will appear after data import</strong>PropLab uses standardised values from the detected RCbenchmark fields.</div>
+            <div class="pl-chart-grid" id="chartGrid" style="display:none;">
+              <div class="pl-chart-card"><div class="pl-chart-title">Thrust vs RPM</div><div class="pl-chart-wrap"><canvas id="chartThrustRpm"></canvas></div></div>
+              <div class="pl-chart-card"><div class="pl-chart-title">Thrust vs Electrical Power</div><div class="pl-chart-wrap"><canvas id="chartThrustPower"></canvas></div></div>
+              <div class="pl-chart-card"><div class="pl-chart-title">Current vs RPM</div><div class="pl-chart-wrap"><canvas id="chartCurrentRpm"></canvas></div></div>
+              <div class="pl-chart-card"><div class="pl-chart-title">Electrical Power vs RPM</div><div class="pl-chart-wrap"><canvas id="chartPowerRpm"></canvas></div></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="pl-stack">
+        <section class="pl-panel">
+          <div class="pl-panel-head"><div><span>DATA CHECK</span><h3>Import Status</h3></div></div>
+          <div class="pl-panel-body" id="statusList">
+            <div class="pl-status" id="statusLibrary"><div class="pl-status-dot"></div><div><strong>Parser ready</strong><p>Waiting for an Excel/CSV file.</p></div></div>
+            <div class="pl-status" id="statusMapping"><div class="pl-status-dot"></div><div><strong>Field mapping</strong><p>No measurement fields detected yet.</p></div></div>
+            <div class="pl-status" id="statusRows"><div class="pl-status-dot"></div><div><strong>Measurement rows</strong><p>No valid rows loaded yet.</p></div></div>
+          </div>
+        </section>
+
+        <section class="pl-panel">
+          <div class="pl-panel-head"><div><span>SAVED TESTS</span><h3>Local Test History</h3></div></div>
+          <div class="pl-panel-body"><div class="pl-history" id="historyList"></div></div>
+        </section>
+
+        <section class="pl-panel">
+          <div class="pl-panel-head"><div><span>NEXT BUILD</span><h3>PropLab Roadmap</h3></div></div>
+          <div class="pl-panel-body">
+            <div class="pl-next">
+              <div><strong>1. Multi-propeller comparison</strong><br />Overlay PT-001, PT-002 and PT-003 on common graphs.</div>
+              <div><strong>2. UAV requirement filter</strong><br />Minimum thrust + maximum current, power and diameter.</div>
+              <div><strong>3. JC-002 integration</strong><br />Attach the approved PropLab test to the AeroMRO maintenance workflow.</div>
+              <div><strong>4. Training + optional AI</strong><br />Explain thrust, RPM, pitch, power and approved results.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="pl-panel">
+          <div class="pl-panel-head"><div><span>SAFETY</span><h3>Physical Testing Boundary</h3></div></div>
+          <div class="pl-panel-body"><div class="pl-note" style="margin-top:0;"><strong>PropLab does not control the motor.</strong> Physical propeller tests remain inside the supervised RCbenchmark environment with the laboratory's guards, operating limits, and procedures.</div></div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+<script>
+  const KGF_TO_N = 9.80665;
+  const STORAGE_KEY = 'aeromro_proplab_tests';
+  let currentRows = [];
+  let currentSource = { file: '', sheet: '', mappings: {}, notes: [] };
+  let charts = {};
+
+  const el = id => document.getElementById(id);
+  const num = value => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  };
+  const round = (value, digits = 2) => Number.isFinite(value) ? Number(value).toFixed(digits) : '—';
+  const normalise = value => String(value ?? '').toLowerCase().replace(/[·•]/g, ' ').replace(/[^a-z0-9%]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+  function loadUser() {
+    const name = sessionStorage.getItem('aeromro_name') || 'Demo User';
+    const role = sessionStorage.getItem('aeromro_role_title') || 'Aviation Trainee';
+    el('userName').textContent = name;
+    el('userRole').textContent = role;
+    el('userAvatar').textContent = name.charAt(0).toUpperCase();
+  }
+
+  function nextTestId() {
+    const tests = getSavedTests();
+    return `PT-${String(tests.length + 1).padStart(3, '0')}`;
+  }
+
+  function getSavedTests() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function setStatus(id, state, title, detail) {
+    const node = el(id);
+    node.className = `pl-status ${state || ''}`;
+    node.querySelector('strong').textContent = title;
+    node.querySelector('p').textContent = detail;
+  }
+
+  function findHeaderIndex(headers, includeGroups, exclude = []) {
+    const norm = headers.map(normalise);
+    for (let i = 0; i < norm.length; i++) {
+      const h = norm[i];
+      if (!h || exclude.some(x => h.includes(x))) continue;
+      const okay = includeGroups.some(group => group.every(x => h.includes(x)));
+      if (okay) return i;
+    }
+    return -1;
+  }
+
+  function detectSheet(workbook) {
+    const candidates = [];
+    workbook.SheetNames.forEach(sheetName => {
+      const ws = workbook.Sheets[sheetName];
+      const matrix = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: false });
+      const maxScan = Math.min(matrix.length, 18);
+
+      for (let r = 0; r < maxScan; r++) {
+        const row = matrix[r] || [];
+        const headers = row.map(v => String(v ?? ''));
+        const rpmOptical = findHeaderIndex(headers, [[ 'motor', 'optical', 'speed' ], ['optical', 'rpm']]);
+        const rpmProp = findHeaderIndex(headers, [[ 'prop', 'speed' ], ['propeller', 'speed' ]]);
+        const rpmAny = findHeaderIndex(headers, [[ 'rpm' ]], ['electrical']);
+        const thrust = findHeaderIndex(headers, [[ 'thrust' ]]);
+        const voltage = findHeaderIndex(headers, [[ 'voltage' ]]);
+        const current = findHeaderIndex(headers, [[ 'current' ]]);
+        const power = findHeaderIndex(headers, [[ 'electrical', 'power' ], ['power', 'w']]);
+        const torque = findHeaderIndex(headers, [[ 'torque' ]]);
+
+        if (thrust >= 0 && (rpmOptical >= 0 || rpmProp >= 0 || rpmAny >= 0)) {
+          let score = 10;
+          score += rpmOptical >= 0 ? 5 : 0;
+          score += voltage >= 0 ? 3 : 0;
+          score += current >= 0 ? 3 : 0;
+          score += power >= 0 ? 2 : 0;
+          score += torque >= 0 ? 1 : 0;
+          if (!/(lsq|high rpm|\(x\)|sheet)/i.test(sheetName)) score += 2;
+          candidates.push({ sheetName, matrix, headerRow: r, headers, score, idx: { rpmOptical, rpmProp, rpmAny, thrust, voltage, current, power, torque } });
+          break;
+        }
+      }
+    });
+
+    candidates.sort((a,b) => b.score - a.score);
+    return candidates[0] || null;
+  }
+
+  function parsePropMeta(matrix) {
+    const meta = {};
+    for (let i = 0; i < Math.min(matrix.length, 12); i++) {
+      const row = matrix[i] || [];
+      const joined = row.map(v => String(v ?? '')).join(' | ');
+      const propMatch = joined.match(/(\d+)\s*:\s*([0-9.]+)\s*inches?\s*diameter\s*,\s*([0-9.]+)\s*inches?\s*pitch/i);
+      if (propMatch) {
+        meta.propId = propMatch[1];
+        meta.diameter = propMatch[2];
+        meta.pitch = propMatch[3];
+      }
+    }
+    return meta;
+  }
+
+  function standardiseCandidate(candidate, fileName) {
+    const { matrix, headerRow, headers, idx } = candidate;
+    const rpmIndex = idx.rpmOptical >= 0 ? idx.rpmOptical : (idx.rpmProp >= 0 ? idx.rpmProp : idx.rpmAny);
+    const thrustHeader = headers[idx.thrust] || '';
+    const thrustIsKgf = /kgf/i.test(thrustHeader);
+    const rows = [];
+    let skipped = 0;
+
+    for (let r = headerRow + 1; r < matrix.length; r++) {
+      const source = matrix[r] || [];
+      const rpm = num(source[rpmIndex]);
+      const rawThrust = num(source[idx.thrust]);
+      if (rpm === null || rawThrust === null || rpm <= 0) { skipped++; continue; }
+
+      const voltage = idx.voltage >= 0 ? num(source[idx.voltage]) : null;
+      const current = idx.current >= 0 ? num(source[idx.current]) : null;
+      const importedPower = idx.power >= 0 ? num(source[idx.power]) : null;
+      const electricalPower = importedPower !== null && importedPower > 0
+        ? Math.abs(importedPower)
+        : (voltage !== null && current !== null ? Math.abs(voltage * current) : null);
+      const torque = idx.torque >= 0 ? num(source[idx.torque]) : null;
+      const thrustN = Math.abs(rawThrust) * (thrustIsKgf ? KGF_TO_N : 1);
+
+      rows.push({
+        sourceRow: r + 1,
+        rpm: Math.abs(rpm),
+        thrustN,
+        rawThrust,
+        rawThrustUnit: thrustIsKgf ? 'kgf' : 'N',
+        voltage: voltage !== null ? Math.abs(voltage) : null,
+        current: current !== null ? Math.abs(current) : null,
+        electricalPower,
+        torque: torque !== null ? Math.abs(torque) : null,
+        thrustPerWatt: electricalPower && electricalPower > 0 ? thrustN / electricalPower : null
+      });
+    }
+
+    const meta = parsePropMeta(matrix);
+    if (meta.propId && !el('propId').value) el('propId').value = meta.propId;
+    if (meta.diameter && !el('diameter').value) el('diameter').value = meta.diameter;
+    if (meta.pitch && !el('pitch').value) el('pitch').value = meta.pitch;
+
+    const mappings = {
+      rpm: headers[rpmIndex] || 'RPM',
+      thrust: thrustHeader || 'Thrust',
+      voltage: idx.voltage >= 0 ? headers[idx.voltage] : 'not found',
+      current: idx.current >= 0 ? headers[idx.current] : 'not found',
+      power: idx.power >= 0 ? headers[idx.power] : 'V × I / not found',
+      torque: idx.torque >= 0 ? headers[idx.torque] : 'not found'
+    };
+
+    currentSource = {
+      file: fileName,
+      sheet: candidate.sheetName,
+      mappings,
+      notes: [
+        thrustIsKgf ? 'Thrust converted from kgf to N.' : 'Thrust read in N.',
+        skipped ? `${skipped} non-numeric/zero-RPM rows skipped.` : 'No rows skipped.'
+      ]
+    };
+
+    return rows;
+  }
+
+  async function importFile(file) {
+    if (!window.XLSX) {
+      setStatus('statusLibrary', 'bad', 'Excel parser unavailable', 'Check your internet connection and reload the page.');
+      return;
+    }
+
+    setStatus('statusLibrary', 'warn', 'Reading source file', file.name);
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array', cellFormula: true, cellDates: true });
+    const candidate = detectSheet(workbook);
+
+    if (!candidate) {
+      setStatus('statusMapping', 'bad', 'No compatible measurement table found', 'A thrust column and RPM/speed column are required.');
+      alert('PropLab could not detect a compatible thrust + RPM measurement table in this file.');
+      return;
+    }
+
+    const rows = standardiseCandidate(candidate, file.name);
+    if (!rows.length) {
+      setStatus('statusRows', 'bad', 'No usable measurement rows', 'The detected sheet did not contain positive RPM with numeric thrust values.');
+      return;
+    }
+
+    currentRows = rows;
+    setStatus('statusLibrary', 'ok', 'Source file loaded', file.name);
+    setStatus('statusMapping', 'ok', 'Fields detected', `${currentSource.mappings.rpm} + ${currentSource.mappings.thrust}`);
+    setStatus('statusRows', 'ok', 'Measurements ready', `${rows.length} valid points standardised for analysis.`);
+    renderAnalysis();
+  }
+
+  function addManualMeasurement() {
+    const rpm = num(el('mRpm').value);
+    const thrustN = num(el('mThrust').value);
+    const voltage = num(el('mVoltage').value);
+    const current = num(el('mCurrent').value);
+    let electricalPower = num(el('mPower').value);
+    const torque = num(el('mTorque').value);
+
+    if (rpm === null || thrustN === null || rpm <= 0) {
+      alert('Manual entry requires a positive RPM and numeric thrust in newtons.');
+      return;
+    }
+    if (electricalPower === null && voltage !== null && current !== null) electricalPower = Math.abs(voltage * current);
+
+    currentRows.push({
+      sourceRow: `M${currentRows.length + 1}`,
+      rpm: Math.abs(rpm),
+      thrustN: Math.abs(thrustN),
+      rawThrust: thrustN,
+      rawThrustUnit: 'N',
+      voltage: voltage !== null ? Math.abs(voltage) : null,
+      current: current !== null ? Math.abs(current) : null,
+      electricalPower: electricalPower !== null ? Math.abs(electricalPower) : null,
+      torque: torque !== null ? Math.abs(torque) : null,
+      thrustPerWatt: electricalPower && electricalPower > 0 ? Math.abs(thrustN) / Math.abs(electricalPower) : null
+    });
+
+    if (!currentSource.file) {
+      currentSource = { file: 'Manual entry', sheet: 'Manual measurements', mappings: { rpm:'Manual RPM', thrust:'Manual thrust (N)' }, notes: [] };
+    }
+
+    ['mRpm','mThrust','mVoltage','mCurrent','mPower','mTorque'].forEach(id => el(id).value = '');
+    setStatus('statusRows', 'ok', 'Manual measurements ready', `${currentRows.length} valid point(s) loaded.`);
+    renderAnalysis();
+  }
+
+  function sortedRows() {
+    return [...currentRows].sort((a,b) => a.rpm - b.rpm);
+  }
+
+  function renderAnalysis() {
+    const hasData = currentRows.length > 0;
+    el('emptyAnalysis').style.display = hasData ? 'none' : 'block';
+    el('analysisContent').style.display = hasData ? 'block' : 'none';
+    el('chartEmpty').style.display = hasData ? 'none' : 'block';
+    el('chartGrid').style.display = hasData ? 'grid' : 'none';
+    el('saveTest').disabled = !hasData;
+    el('exportCsv').disabled = !hasData;
+    el('analysisBadge').textContent = hasData ? 'DATA READY' : 'NO DATA';
+    el('analysisBadge').style.color = hasData ? '#61e1ad' : '#70879a';
+    if (!hasData) return;
+
+    const rows = sortedRows();
+    const maxRpm = Math.max(...rows.map(r => r.rpm));
+    const maxThrust = Math.max(...rows.map(r => r.thrustN));
+    const powers = rows.map(r => r.electricalPower).filter(Number.isFinite);
+    const maxPower = powers.length ? Math.max(...powers) : NaN;
+
+    el('metricRows').textContent = rows.length;
+    el('metricRpm').textContent = Math.round(maxRpm).toLocaleString();
+    el('metricThrust').textContent = round(maxThrust, 2);
+    el('metricPower').textContent = Number.isFinite(maxPower) ? round(maxPower, 1) : '—';
+    el('sourceFile').textContent = currentSource.file || 'Manual entry';
+    el('sourceSheet').textContent = currentSource.sheet || '—';
+    el('mapRpm').textContent = currentSource.mappings.rpm || '—';
+    el('mapThrust').textContent = currentSource.mappings.thrust || '—';
+
+    const tbody = el('dataTableBody');
+    tbody.innerHTML = '';
+    rows.slice(0, 120).forEach((r, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${i+1}</td><td>${Math.round(r.rpm)}</td><td>${round(r.thrustN,3)}</td><td>${round(r.voltage,3)}</td><td>${round(r.current,3)}</td><td>${round(r.electricalPower,2)}</td><td>${round(r.torque,4)}</td><td>${round(r.thrustPerWatt,4)}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    renderCharts(rows);
+  }
+
+  function destroyCharts() {
+    Object.values(charts).forEach(c => c && c.destroy());
+    charts = {};
+  }
+
+  function chartOptions(xTitle, yTitle) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      parsing: false,
+      animation: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${round(ctx.parsed.y, 3)}` } } },
+      scales: {
+        x: { type: 'linear', title: { display: true, text: xTitle, color: '#758da0' }, ticks: { color: '#758da0', maxTicksLimit: 7 }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { title: { display: true, text: yTitle, color: '#758da0' }, ticks: { color: '#758da0', maxTicksLimit: 7 }, grid: { color: 'rgba(255,255,255,.04)' } }
+      }
+    };
+  }
+
+  function makeScatter(canvasId, points, xTitle, yTitle) {
+    const clean = points.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+    charts[canvasId] = new Chart(el(canvasId), {
+      type: 'scatter',
+      data: { datasets: [{ data: clean, pointRadius: clean.length > 220 ? 1.4 : 2.5, pointHoverRadius: 4, showLine: true, borderWidth: 1.4 }] },
+      options: chartOptions(xTitle, yTitle)
+    });
+  }
+
+  function renderCharts(rows) {
+    if (!window.Chart) return;
+    destroyCharts();
+    const decimated = rows.length > 350 ? rows.filter((_,i) => i % Math.ceil(rows.length / 300) === 0) : rows;
+    makeScatter('chartThrustRpm', decimated.map(r => ({x:r.rpm,y:r.thrustN})), 'RPM', 'Thrust (N)');
+    makeScatter('chartThrustPower', decimated.map(r => ({x:r.electricalPower,y:r.thrustN})), 'Electrical Power (W)', 'Thrust (N)');
+    makeScatter('chartCurrentRpm', decimated.map(r => ({x:r.rpm,y:r.current})), 'RPM', 'Current (A)');
+    makeScatter('chartPowerRpm', decimated.map(r => ({x:r.rpm,y:r.electricalPower})), 'RPM', 'Electrical Power (W)');
+  }
+
+  function saveCurrentTest() {
+    if (!currentRows.length) return;
+    const tests = getSavedTests();
+    const test = {
+      id: el('testId').value.trim() || nextTestId(),
+      propId: el('propId').value.trim(),
+      diameter: el('diameter').value.trim(),
+      pitch: el('pitch').value.trim(),
+      motor: el('motor').value.trim(),
+      battery: el('battery').value.trim(),
+      notes: el('operatorNotes').value.trim(),
+      savedAt: new Date().toLocaleString(),
+      source: currentSource,
+      rows: currentRows
+    };
+
+    const existingIndex = tests.findIndex(t => t.id === test.id);
+    if (existingIndex >= 0) tests[existingIndex] = test; else tests.push(test);
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tests));
+      renderHistory();
+      alert(`${test.id} saved in this browser.`);
+    } catch {
+      alert('Browser storage is full. Export the clean CSV and remove older saved tests.');
+    }
+  }
+
+  function renderHistory() {
+    const list = el('historyList');
+    const tests = getSavedTests().slice().reverse();
+    list.innerHTML = '';
+    if (!tests.length) {
+      list.innerHTML = '<div class="pl-empty" style="padding:16px 8px;"><strong>No saved tests</strong>Saved PropLab records will appear here.</div>';
+      return;
+    }
+    tests.slice(0, 6).forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'pl-history-item';
+      const prop = t.propId || [t.diameter, t.pitch].filter(Boolean).join(' × ') || 'Unlabelled propeller';
+      div.innerHTML = `<strong>${escapeHtml(t.id)} — ${escapeHtml(prop)}</strong><span>${escapeHtml(t.savedAt)} • ${t.rows?.length || 0} measurement points<br>${escapeHtml(t.source?.file || 'Manual entry')}</span>`;
+      list.appendChild(div);
+    });
+  }
+
+  function exportCleanCsv() {
+    if (!currentRows.length) return;
+    const headers = ['Test ID','Propeller ID','Diameter in','Pitch in','Source Row','RPM','Thrust N','Voltage V','Current A','Electrical Power W','Torque Nm','Thrust per Watt N/W'];
+    const meta = [el('testId').value, el('propId').value, el('diameter').value, el('pitch').value];
+    const lines = [headers.join(',')];
+    sortedRows().forEach(r => {
+      const row = [...meta, r.sourceRow, r.rpm, r.thrustN, r.voltage ?? '', r.current ?? '', r.electricalPower ?? '', r.torque ?? '', r.thrustPerWatt ?? ''];
+      lines.push(row.map(csvEscape).join(','));
+    });
+    const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${(el('testId').value || 'PropLab_Test').replace(/[^a-z0-9_-]/gi,'_')}_clean.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 500);
+  }
+
+  function csvEscape(v) {
+    const s = String(v ?? '');
+    return /[",\n]/.test(s) ? `"${s.replaceAll('"','""')}"` : s;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+  }
+
+  function resetCurrent() {
+    currentRows = [];
+    currentSource = { file: '', sheet: '', mappings: {}, notes: [] };
+    el('fileInput').value = '';
+    ['propId','diameter','pitch','motor','battery','operatorNotes'].forEach(id => el(id).value = '');
+    el('testId').value = nextTestId();
+    destroyCharts();
+    renderAnalysis();
+    setStatus('statusLibrary', '', 'Parser ready', 'Waiting for an Excel/CSV file.');
+    setStatus('statusMapping', '', 'Field mapping', 'No measurement fields detected yet.');
+    setStatus('statusRows', '', 'Measurement rows', 'No valid rows loaded yet.');
+  }
+
+  el('fileInput').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try { await importFile(file); }
+    catch (err) {
+      console.error(err);
+      setStatus('statusLibrary', 'bad', 'Import failed', 'The file could not be parsed. Try the original RCbenchmark export.');
+      alert('Import failed. Please try the original RCbenchmark Excel/CSV export.');
+    }
+  });
+  el('manualToggle').addEventListener('click', () => el('manualPanel').classList.toggle('active'));
+  el('addManualRow').addEventListener('click', addManualMeasurement);
+  el('saveTest').addEventListener('click', saveCurrentTest);
+  el('exportCsv').addEventListener('click', exportCleanCsv);
+  el('resetTest').addEventListener('click', () => { if (confirm('Reset the current unsaved PropLab test?')) resetCurrent(); });
+
+  loadUser();
+  renderHistory();
+  el('testId').value = nextTestId();
+  if (!window.XLSX) setStatus('statusLibrary', 'bad', 'Excel parser unavailable', 'Reload while connected to the internet.');
+</script>
+</body>
+</html>
