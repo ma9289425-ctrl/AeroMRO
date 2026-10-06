@@ -169,8 +169,40 @@
     .pl-next div { padding: 12px; border: 1px solid rgba(255,255,255,.05); border-radius: 10px; background: rgba(255,255,255,.02); color:#879daf; font-size:9px; line-height:1.5; }
     .pl-next strong { color: white; }
 
+
+
+    .pl-wide { margin-top: 20px; }
+    .pl-compare-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:16px; }
+    .pl-compare-card { padding:15px; border:1px solid rgba(255,255,255,.06); border-radius:13px; background:rgba(255,255,255,.022); }
+    .pl-compare-card .top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .pl-compare-card .test-id { color:#66baff; font-size:9px; font-weight:900; letter-spacing:.7px; }
+    .pl-compare-card h4 { margin:5px 0 0; font-size:14px; }
+    .pl-compare-card .meta { margin-top:5px; color:#728a9c; font-size:8px; line-height:1.45; }
+    .pl-mini-grid { margin-top:13px; display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+    .pl-mini { padding:9px; border:1px solid rgba(255,255,255,.045); border-radius:9px; background:rgba(4,13,22,.35); }
+    .pl-mini span { display:block; color:#71899b; font-size:7px; text-transform:uppercase; letter-spacing:.55px; }
+    .pl-mini strong { display:block; margin-top:4px; font-size:11px; }
+    .pl-swatch { width:10px; height:10px; border-radius:50%; flex:none; margin-top:2px; }
+
+    .pl-selection-grid { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:18px; }
+    .pl-requirements { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+    .pl-result-summary { padding:16px; border:1px solid rgba(66,165,255,.13); border-radius:13px; background:rgba(66,165,255,.035); min-height:120px; }
+    .pl-result-summary .eyebrow { color:#6e899c; font-size:8px; font-weight:900; letter-spacing:.85px; }
+    .pl-result-summary h3 { margin:7px 0 6px; font-size:20px; }
+    .pl-result-summary p { color:#859cad; font-size:9px; line-height:1.55; margin:0; }
+    .pl-selection-list { display:grid; gap:9px; margin-top:13px; }
+    .pl-selection-item { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; padding:12px; border:1px solid rgba(255,255,255,.055); border-radius:11px; background:rgba(255,255,255,.02); }
+    .pl-selection-item strong { display:block; font-size:10px; }
+    .pl-selection-item span { display:block; margin-top:4px; color:#758d9f; font-size:8px; line-height:1.45; }
+    .pl-status-pill { display:inline-flex; padding:6px 8px; border-radius:999px; font-size:7px; font-weight:900; letter-spacing:.5px; white-space:nowrap; }
+    .pl-status-pill.pass { color:#6aebb8; background:rgba(67,214,156,.09); border:1px solid rgba(67,214,156,.16); }
+    .pl-status-pill.fail { color:#ff9d9d; background:rgba(255,114,114,.08); border:1px solid rgba(255,114,114,.15); }
+    .pl-status-pill.warn { color:#efb475; background:rgba(245,166,91,.08); border:1px solid rgba(245,166,91,.15); }
+    .pl-compare-note { margin-top:12px; color:#728a9d; font-size:8px; line-height:1.5; }
+
     @media (max-width: 1050px) {
-      .pl-hero, .pl-grid { grid-template-columns: 1fr; }
+      .pl-hero, .pl-grid, .pl-selection-grid { grid-template-columns: 1fr; }
+      .pl-compare-cards { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .pl-metrics { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 720px) {
@@ -178,7 +210,7 @@
       .pl-topbar { padding: 0 16px; }
       .pl-user-copy { display: none; }
       .pl-hero { padding: 22px; }
-      .pl-form-grid, .pl-data-info, .pl-chart-grid, .pl-manual-grid { grid-template-columns: 1fr; }
+      .pl-form-grid, .pl-data-info, .pl-chart-grid, .pl-manual-grid, .pl-requirements, .pl-compare-cards { grid-template-columns: 1fr; }
       .pl-metrics { grid-template-columns: 1fr 1fr; }
     }
   </style>
@@ -200,9 +232,9 @@
 
     <section class="pl-hero">
       <div>
-        <span class="pl-kicker">AEROMRO PROPLAB • VERSION 0.2</span>
+        <span class="pl-kicker">AEROMRO PROPLAB • VERSION 0.3</span>
         <h1>Propeller Performance Analysis</h1>
-        <p>Import RCbenchmark Excel/CSV test data, standardise the required measurements, inspect the source mapping, and visualise static propeller performance. Version 0.2 adds transient-aware analysis and corrected power-domain plotting before multi-propeller selection is added.</p>
+        <p>Import RCbenchmark Excel/CSV test data, standardise the required measurements, inspect the source mapping, and visualise static propeller performance. Version 0.3 adds saved-test comparison and a UAV requirement filter while keeping the RCbenchmark measurement workflow unchanged.</p>
       </div>
       <div class="pl-flow">
         <span>BASELINE DATA FLOW</span>
@@ -328,13 +360,13 @@
         </section>
 
         <section class="pl-panel">
-          <div class="pl-panel-head"><div><span>NEXT BUILD</span><h3>PropLab Roadmap</h3></div></div>
+          <div class="pl-panel-head"><div><span>VERSION 0.3</span><h3>Current Capability</h3></div></div>
           <div class="pl-panel-body">
             <div class="pl-next">
-              <div><strong>1. Multi-propeller comparison</strong><br />Overlay PT-001, PT-002 and PT-003 on common graphs.</div>
-              <div><strong>2. UAV requirement filter</strong><br />Minimum thrust + maximum current, power and diameter.</div>
-              <div><strong>3. JC-002 integration</strong><br />Attach the approved PropLab test to the AeroMRO maintenance workflow.</div>
-              <div><strong>4. Training + optional AI</strong><br />Explain thrust, RPM, pitch, power and approved results.</div>
+              <div><strong>✓ Single-test analysis</strong><br />RCbenchmark import, field mapping, transient handling and performance plots.</div>
+              <div><strong>✓ Multi-test comparison</strong><br />Saved PT records can be overlaid on common thrust/RPM and thrust/power graphs.</div>
+              <div><strong>✓ UAV requirement filter</strong><br />Checks minimum thrust with optional current, power and diameter limits.</div>
+              <div><strong>Next: JC-002 integration</strong><br />Connect approved PropLab results to the AeroMRO maintenance workflow.</div>
             </div>
           </div>
         </section>
@@ -345,6 +377,59 @@
         </section>
       </aside>
     </section>
+
+
+    <section class="pl-panel pl-wide" id="compareSection">
+      <div class="pl-panel-head">
+        <div><span>MULTI-PROPELLER COMPARISON</span><h2>Compare Saved Propeller Tests</h2></div>
+        <div id="compareBadge" style="font-size:9px;color:#70879a;">0 SAVED TESTS</div>
+      </div>
+      <div class="pl-panel-body">
+        <div class="pl-empty" id="compareEmpty"><strong>Save at least one PropLab test</strong>Saved tests will appear here. Two or more tests are needed for a true comparison.</div>
+        <div id="compareContent" style="display:none;">
+          <div class="pl-compare-cards" id="compareCards"></div>
+          <div class="pl-chart-grid">
+            <div class="pl-chart-card"><div class="pl-chart-title">Saved Tests — Thrust vs RPM</div><div class="pl-chart-wrap"><canvas id="compareThrustRpm"></canvas></div></div>
+            <div class="pl-chart-card"><div class="pl-chart-title">Saved Tests — Thrust vs Electrical Power</div><div class="pl-chart-wrap"><canvas id="compareThrustPower"></canvas></div></div>
+          </div>
+          <div class="pl-compare-note">Comparison uses each saved test's analysis rows after the same shutdown/transient screening used in Version 0.2. Tests with different hardware or conditions should remain clearly labelled and should not be treated as equivalent experiments.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pl-panel pl-wide" id="selectionSection">
+      <div class="pl-panel-head">
+        <div><span>UAV REQUIREMENT FILTER</span><h2>Tested Propeller Selection</h2></div>
+        <div style="font-size:9px;color:#6f8799;">MEASURED DATA ONLY</div>
+      </div>
+      <div class="pl-panel-body">
+        <div class="pl-selection-grid">
+          <div>
+            <div class="pl-requirements">
+              <div class="pl-field"><label>Minimum Static Thrust (N) *</label><input id="reqThrust" type="number" step="0.1" min="0" placeholder="e.g. 8.0" /></div>
+              <div class="pl-field"><label>Maximum Current (A)</label><input id="reqCurrent" type="number" step="0.1" min="0" placeholder="optional" /></div>
+              <div class="pl-field"><label>Maximum Electrical Power (W)</label><input id="reqPower" type="number" step="1" min="0" placeholder="optional" /></div>
+              <div class="pl-field"><label>Maximum Propeller Diameter (in)</label><input id="reqDiameter" type="number" step="0.1" min="0" placeholder="optional" /></div>
+            </div>
+            <div class="pl-button-row">
+              <button class="pl-btn primary" type="button" id="runSelection">Evaluate Saved Tests</button>
+              <button class="pl-btn secondary" type="button" id="clearSelection">Clear</button>
+            </div>
+            <div class="pl-note"><strong>Selection rule:</strong> For each compatible saved propeller, PropLab finds the lowest-electrical-power measured operating point that meets the minimum thrust and all entered limits. It never extrapolates beyond saved measurements. If more than one propeller is feasible, the lowest-power feasible candidate is highlighted; thrust-per-watt is shown as supporting information, not as flight efficiency.</div>
+          </div>
+
+          <div>
+            <div class="pl-result-summary" id="selectionSummary">
+              <div class="eyebrow">SELECTION RESULT</div>
+              <h3>Enter UAV requirements</h3>
+              <p>At least a minimum static-thrust requirement is needed. Save PT-002 and PT-003 later to turn this into a true multi-propeller selection.</p>
+            </div>
+            <div class="pl-selection-list" id="selectionList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
 <script>
@@ -353,6 +438,7 @@
   let currentRows = [];
   let currentSource = { file: '', sheet: '', mappings: {}, notes: [] };
   let charts = {};
+  let compareCharts = {};
 
   const el = id => document.getElementById(id);
   const num = value => {
@@ -786,6 +872,7 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(tests));
       renderHistory();
+      renderComparison();
       alert(`${test.id} saved in this browser.`);
     } catch {
       alert('Browser storage is full. Export the clean CSV and remove older saved tests.');
@@ -807,6 +894,230 @@
       div.innerHTML = `<strong>${escapeHtml(t.id)} — ${escapeHtml(prop)}</strong><span>${escapeHtml(t.savedAt)} • ${t.rows?.length || 0} measurement points<br>${escapeHtml(t.source?.file || 'Manual entry')}</span>`;
       list.appendChild(div);
     });
+  }
+
+
+  function savedAnalysisRows(test) {
+    const rows = Array.isArray(test?.rows) ? test.rows : [];
+    return classifyAnalysisRows(rows).filter(r => !r._excluded && Number.isFinite(r.rpm) && Number.isFinite(r.thrustN));
+  }
+
+  function testDisplayName(test) {
+    const label = test?.propId || [test?.diameter, test?.pitch].filter(Boolean).join(' × ') || 'Unlabelled propeller';
+    return `${test?.id || 'PT'} — ${label}`;
+  }
+
+  function savedTestStats(test) {
+    const rows = savedAnalysisRows(test);
+    const rpms = rows.map(r => r.rpm).filter(Number.isFinite);
+    const thrusts = rows.map(r => r.thrustN).filter(Number.isFinite);
+    const powers = rows.map(r => r.electricalPower).filter(Number.isFinite);
+    const currents = rows.map(r => r.current).filter(Number.isFinite);
+    return {
+      rows,
+      maxRpm: rpms.length ? Math.max(...rpms) : null,
+      maxThrust: thrusts.length ? Math.max(...thrusts) : null,
+      maxPower: powers.length ? Math.max(...powers) : null,
+      maxCurrent: currents.length ? Math.max(...currents) : null
+    };
+  }
+
+  function destroyCompareCharts() {
+    Object.values(compareCharts).forEach(c => c && c.destroy());
+    compareCharts = {};
+  }
+
+  function compareChartOptions(xTitle, yTitle) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      parsing: false,
+      animation: false,
+      normalized: true,
+      interaction: { mode: 'nearest', intersect: false },
+      plugins: {
+        legend: { display: true, labels: { color:'#9bb0c0', boxWidth:10, boxHeight:10, font:{size:9} } },
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: x ${round(ctx.parsed.x,2)}, y ${round(ctx.parsed.y,2)}` } }
+      },
+      scales: {
+        x: { type:'linear', min:0, title:{display:true,text:xTitle,color:'#758da0'}, ticks:{color:'#758da0',maxTicksLimit:7}, grid:{color:'rgba(255,255,255,.04)'} },
+        y: { min:0, title:{display:true,text:yTitle,color:'#758da0'}, ticks:{color:'#758da0',maxTicksLimit:7}, grid:{color:'rgba(255,255,255,.04)'} }
+      }
+    };
+  }
+
+  function renderComparison() {
+    const tests = getSavedTests();
+    const empty = el('compareEmpty');
+    const content = el('compareContent');
+    const cards = el('compareCards');
+    const badge = el('compareBadge');
+    badge.textContent = `${tests.length} SAVED TEST${tests.length === 1 ? '' : 'S'}`;
+    cards.innerHTML = '';
+    destroyCompareCharts();
+
+    if (!tests.length) {
+      empty.style.display = 'block';
+      content.style.display = 'none';
+      return;
+    }
+
+    empty.style.display = 'none';
+    content.style.display = 'block';
+
+    const palette = ['#42a5ff','#43d69c','#f5a65b','#c58cff','#ff7c96','#68d8e8'];
+    const rpmDatasets = [];
+    const powerDatasets = [];
+
+    tests.forEach((test, idx) => {
+      const stats = savedTestStats(test);
+      const color = palette[idx % palette.length];
+      const card = document.createElement('div');
+      card.className = 'pl-compare-card';
+      const dimensions = (test.diameter || test.pitch) ? `${test.diameter || '?'} × ${test.pitch || '?'} in` : 'Dimensions not recorded';
+      card.innerHTML = `
+        <div class="top"><div><div class="test-id">${escapeHtml(test.id || 'PT')}</div><h4>${escapeHtml(test.propId || 'Unlabelled propeller')}</h4><div class="meta">${escapeHtml(dimensions)}<br>${escapeHtml(test.source?.file || 'Manual entry')}</div></div><div class="pl-swatch" style="background:${color}"></div></div>
+        <div class="pl-mini-grid">
+          <div class="pl-mini"><span>Max thrust</span><strong>${round(stats.maxThrust,2)} N</strong></div>
+          <div class="pl-mini"><span>Max RPM</span><strong>${Number.isFinite(stats.maxRpm) ? Math.round(stats.maxRpm).toLocaleString() : '—'}</strong></div>
+          <div class="pl-mini"><span>Max power</span><strong>${round(stats.maxPower,1)} W</strong></div>
+          <div class="pl-mini"><span>Analysis points</span><strong>${stats.rows.length}</strong></div>
+        </div>`;
+      cards.appendChild(card);
+
+      let rows = stats.rows.slice().sort((a,b) => a.rpm - b.rpm);
+      if (rows.length > 260) rows = rows.filter((_,i) => i % Math.ceil(rows.length/240) === 0);
+      rpmDatasets.push({
+        label: test.id || `PT-${idx+1}`,
+        data: rows.map(r => ({x:r.rpm,y:r.thrustN})),
+        borderColor: color,
+        backgroundColor: color,
+        pointRadius: rows.length > 150 ? 0.8 : 1.8,
+        pointHoverRadius: 4,
+        borderWidth: 1.5,
+        showLine: true
+      });
+      const powerRows = rows.filter(r => Number.isFinite(r.electricalPower));
+      powerDatasets.push({
+        label: test.id || `PT-${idx+1}`,
+        data: powerRows.map(r => ({x:r.electricalPower,y:r.thrustN})).sort((a,b)=>a.x-b.x),
+        borderColor: color,
+        backgroundColor: color,
+        pointRadius: powerRows.length > 150 ? 0.8 : 1.8,
+        pointHoverRadius: 4,
+        borderWidth: 1.5,
+        showLine: true
+      });
+    });
+
+    compareCharts.rpm = new Chart(el('compareThrustRpm'), { type:'scatter', data:{datasets:rpmDatasets}, options:compareChartOptions('RPM','Thrust (N)') });
+    compareCharts.power = new Chart(el('compareThrustPower'), { type:'scatter', data:{datasets:powerDatasets}, options:compareChartOptions('Electrical Power (W)','Thrust (N)') });
+  }
+
+  function readRequirement(id) {
+    const raw = el(id).value.trim();
+    if (!raw) return null;
+    const value = Number(raw);
+    return Number.isFinite(value) && value >= 0 ? value : NaN;
+  }
+
+  function evaluateSavedTest(test, req) {
+    const stats = savedTestStats(test);
+    const diameter = num(test.diameter);
+    const reasons = [];
+
+    if (req.maxDiameter !== null) {
+      if (diameter === null) reasons.push('diameter not recorded');
+      else if (diameter > req.maxDiameter) reasons.push(`diameter ${diameter} in exceeds ${req.maxDiameter} in`);
+    }
+
+    if (!stats.rows.length) reasons.push('no usable analysis rows');
+    if (reasons.length) return { test, stats, status: reasons.some(r => r.includes('not recorded')) ? 'incomplete' : 'fail', reasons, point:null };
+
+    const candidates = stats.rows.filter(r => {
+      if (!(r.thrustN >= req.minThrust)) return false;
+      if (req.maxCurrent !== null && (!Number.isFinite(r.current) || r.current > req.maxCurrent)) return false;
+      if (req.maxPower !== null && (!Number.isFinite(r.electricalPower) || r.electricalPower > req.maxPower)) return false;
+      return true;
+    });
+
+    if (!candidates.length) {
+      const maxThrust = stats.maxThrust;
+      if (!Number.isFinite(maxThrust) || maxThrust < req.minThrust) reasons.push(`max measured thrust ${round(maxThrust,2)} N is below ${req.minThrust} N`);
+      else reasons.push('no measured operating point satisfies all entered limits');
+      return { test, stats, status:'fail', reasons, point:null };
+    }
+
+    candidates.sort((a,b) => {
+      const ap = Number.isFinite(a.electricalPower) ? a.electricalPower : Infinity;
+      const bp = Number.isFinite(b.electricalPower) ? b.electricalPower : Infinity;
+      if (ap !== bp) return ap - bp;
+      return a.rpm - b.rpm;
+    });
+    return { test, stats, status:'pass', reasons:[], point:candidates[0] };
+  }
+
+  function runSelection() {
+    const minThrust = readRequirement('reqThrust');
+    const maxCurrent = readRequirement('reqCurrent');
+    const maxPower = readRequirement('reqPower');
+    const maxDiameter = readRequirement('reqDiameter');
+    const vals = [minThrust,maxCurrent,maxPower,maxDiameter];
+    if (vals.some(v => Number.isNaN(v))) { alert('Requirements must be non-negative numbers.'); return; }
+    if (minThrust === null || minThrust <= 0) { alert('Enter a minimum static thrust greater than zero.'); return; }
+
+    const tests = getSavedTests();
+    if (!tests.length) { alert('Save at least one PropLab test first.'); return; }
+
+    const req = { minThrust, maxCurrent, maxPower, maxDiameter };
+    const results = tests.map(t => evaluateSavedTest(t, req));
+    const feasible = results.filter(r => r.status === 'pass');
+
+    feasible.sort((a,b) => {
+      const ap = Number.isFinite(a.point?.electricalPower) ? a.point.electricalPower : Infinity;
+      const bp = Number.isFinite(b.point?.electricalPower) ? b.point.electricalPower : Infinity;
+      if (ap !== bp) return ap - bp;
+      const ae = a.point?.thrustPerWatt || 0;
+      const be = b.point?.thrustPerWatt || 0;
+      return be - ae;
+    });
+
+    const summary = el('selectionSummary');
+    if (!feasible.length) {
+      summary.innerHTML = `<div class="eyebrow">SELECTION RESULT</div><h3>No feasible saved propeller</h3><p>None of the saved measured configurations satisfies the entered requirements. Change the limits or collect additional compatible propeller tests.</p>`;
+    } else {
+      const best = feasible[0];
+      const label = testDisplayName(best.test);
+      const oneOnly = tests.length < 2;
+      summary.innerHTML = `<div class="eyebrow">${oneOnly ? 'FEASIBILITY CHECK' : 'RECOMMENDED TESTED PROPELLER'}</div><h3>${escapeHtml(label)}</h3><p>${oneOnly ? 'Only one saved test is available, so this is not yet a comparative recommendation. ' : ''}Lowest-power feasible recorded point: ${round(best.point.electricalPower,1)} W at ${Math.round(best.point.rpm).toLocaleString()} rpm, producing ${round(best.point.thrustN,2)} N. Thrust-per-watt: ${round(best.point.thrustPerWatt,4)} N/W.</p>`;
+    }
+
+    const list = el('selectionList');
+    list.innerHTML = '';
+    results.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'pl-selection-item';
+      let detail = '';
+      let pill = '';
+      if (r.status === 'pass') {
+        detail = `Lowest-power feasible point: ${round(r.point.electricalPower,1)} W • ${round(r.point.thrustN,2)} N • ${Math.round(r.point.rpm).toLocaleString()} rpm • ${round(r.point.current,2)} A${r.test.diameter ? ` • ${escapeHtml(r.test.diameter)} in diameter` : ''}`;
+        pill = '<span class="pl-status-pill pass">FEASIBLE</span>';
+      } else if (r.status === 'incomplete') {
+        detail = r.reasons.join('; ');
+        pill = '<span class="pl-status-pill warn">NEEDS DATA</span>';
+      } else {
+        detail = r.reasons.join('; ');
+        pill = '<span class="pl-status-pill fail">NOT FEASIBLE</span>';
+      }
+      item.innerHTML = `<div><strong>${escapeHtml(testDisplayName(r.test))}</strong><span>${escapeHtml(detail)}</span></div>${pill}`;
+      list.appendChild(item);
+    });
+  }
+
+  function clearSelection() {
+    ['reqThrust','reqCurrent','reqPower','reqDiameter'].forEach(id => el(id).value = '');
+    el('selectionSummary').innerHTML = '<div class="eyebrow">SELECTION RESULT</div><h3>Enter UAV requirements</h3><p>At least a minimum static-thrust requirement is needed. Save PT-002 and PT-003 later to turn this into a true multi-propeller selection.</p>';
+    el('selectionList').innerHTML = '';
   }
 
   function exportCleanCsv() {
@@ -866,9 +1177,12 @@
   el('exportCsv').addEventListener('click', exportCleanCsv);
   el('resetTest').addEventListener('click', () => { if (confirm('Reset the current unsaved PropLab test?')) resetCurrent(); });
   el('filterTransients').addEventListener('change', renderAnalysis);
+  el('runSelection').addEventListener('click', runSelection);
+  el('clearSelection').addEventListener('click', clearSelection);
 
   loadUser();
   renderHistory();
+  renderComparison();
   el('testId').value = nextTestId();
   if (!window.XLSX) setStatus('statusLibrary', 'bad', 'Excel parser unavailable', 'Reload while connected to the internet.');
 </script>
