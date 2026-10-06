@@ -4,12 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>AeroMRO | Aviation Maintenance & Training</title>
+    <title>AeroMRO | Aviation Maintenance, Training & Propeller Analysis</title>
 
     <meta name="description"
-          content="AeroMRO is an integrated aircraft maintenance workflow and aviation training simulation platform.">
+          content="AeroMRO integrates aircraft maintenance workflow, aviation training, and UAV propeller performance analysis in one educational platform.">
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261006-1">
+
+    <style>
+        /* PropLab integration: keeps the existing AeroMRO visual language. */
+        .mode-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .proplab-card::before {
+            background: rgba(199,152,255,0.10);
+        }
+
+        .card-status.proplab {
+            color: #c798ff;
+            background: rgba(199,152,255,0.10);
+        }
+
+        .proplab-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            background: linear-gradient(135deg, #7667ff, #9b7cff);
+            transition: transform .2s ease, filter .2s ease;
+        }
+
+        .proplab-button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+        }
+
+        .workflow {
+            grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
+        }
+
+        @media (max-width: 1100px) and (min-width: 851px) {
+            .mode-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .proplab-card {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .mode-grid {
+                grid-template-columns: 1fr;
+            }
+            .proplab-card {
+                grid-column: auto;
+            }
+            .workflow {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -24,7 +85,7 @@
 
             <div>
                 <h1>AeroMRO</h1>
-                <span>AVIATION TRAINING PLATFORM</span>
+                <span>AVIATION TRAINING & ANALYSIS PLATFORM</span>
             </div>
         </div>
 
@@ -53,14 +114,14 @@
             </h2>
 
             <p class="hero-description">
-                An integrated web-based platform combining simulated
-                aircraft maintenance workflows with interactive technical
-                training and AI-assisted learning.
+                An integrated web-based platform combining simulated aircraft
+                maintenance workflows, interactive technical training, and
+                RCbenchmark-based UAV propeller performance analysis.
             </p>
 
 
             <!-- =========================
-                 TWO MAIN MODES
+                 THREE INTEGRATED MODULES
             ========================== -->
             <div class="mode-grid">
 
@@ -183,6 +244,66 @@
 
                 </article>
 
+
+                <!-- PROPLAB -->
+                <article class="mode-card proplab-card">
+
+                    <div class="card-top">
+
+                        <div class="mode-icon">
+                            ⚙
+                        </div>
+
+                        <div class="card-status proplab">
+                            EXPERIMENTAL ANALYSIS
+                        </div>
+
+                    </div>
+
+                    <h3>PropLab</h3>
+
+                    <p>
+                        Import RCbenchmark test data, analyse static propeller
+                        performance, compare tested configurations, and support
+                        UAV propeller selection against defined requirements.
+                    </p>
+
+                    <div class="feature-list">
+
+                        <div class="feature">
+                            <span>✓</span>
+                            RCbenchmark Excel / CSV Import
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Static Thrust Performance Plots
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Multi-Propeller Comparison
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            UAV Requirement Filter
+                        </div>
+
+                        <div class="feature">
+                            <span>✓</span>
+                            Test History & Selection Support
+                        </div>
+
+                    </div>
+
+                    <a class="proplab-button" href="proplab.html">
+                        Open PropLab
+                        <span>→</span>
+                    </a>
+
+                </article>
+
             </div>
 
 
@@ -192,7 +313,7 @@
             <section class="integration">
 
                 <div class="integration-label">
-                    INTEGRATED LEARNING LOOP
+                    INTEGRATED ENGINEERING & LEARNING LOOP
                 </div>
 
                 <div class="workflow">
@@ -200,31 +321,39 @@
                     <div class="workflow-item">
                         <div class="workflow-number">01</div>
                         <strong>Perform</strong>
-                        <span>Complete simulated maintenance tasks</span>
+                        <span>Complete the maintenance or experimental task</span>
                     </div>
 
                     <div class="workflow-arrow">→</div>
 
                     <div class="workflow-item">
                         <div class="workflow-number">02</div>
-                        <strong>Inspect</strong>
-                        <span>Receive QA feedback and discrepancies</span>
+                        <strong>Measure</strong>
+                        <span>Collect supervised RCbenchmark test data</span>
                     </div>
 
                     <div class="workflow-arrow">→</div>
 
                     <div class="workflow-item">
                         <div class="workflow-number">03</div>
-                        <strong>Learn</strong>
-                        <span>Access related technical training</span>
+                        <strong>Analyse</strong>
+                        <span>Compare performance and apply UAV requirements</span>
                     </div>
 
                     <div class="workflow-arrow">→</div>
 
                     <div class="workflow-item">
                         <div class="workflow-number">04</div>
-                        <strong>Improve</strong>
-                        <span>Retry tasks with improved knowledge</span>
+                        <strong>Review</strong>
+                        <span>Record QA or instructor feedback and decisions</span>
+                    </div>
+
+                    <div class="workflow-arrow">→</div>
+
+                    <div class="workflow-item">
+                        <div class="workflow-number">05</div>
+                        <strong>Learn & Improve</strong>
+                        <span>Open related technical training and refine the task</span>
                     </div>
 
                 </div>
@@ -243,7 +372,7 @@
 
         <div>
             <strong>AeroMRO</strong>
-            <span> • Training & Simulation Platform</span>
+            <span> • Training, Maintenance & Propeller Analysis Platform</span>
         </div>
 
         <p>
