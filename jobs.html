@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroMRO | Job Cards</title>
+  <link rel="stylesheet" href="./style.css?v=20261006-4">
+  <style>
+    body.jobs-page{min-height:100vh;background:#07111d}
+    .jobs-shell{max-width:1450px;margin:0 auto;padding:36px 4% 70px}
+    .jobs-topline{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:22px}
+    .back-button{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:rgba(255,255,255,.035);color:#9badbd;text-decoration:none}
+    .back-button:hover{color:#fff;border-color:rgba(59,158,255,.35)}
+    .role-pill{padding:8px 12px;border:1px solid rgba(59,158,255,.22);background:rgba(59,158,255,.08);color:#68b7ff;border-radius:8px;font-size:10px;font-weight:800;letter-spacing:1px}
+    .jobs-hero{padding:28px;border:1px solid rgba(255,255,255,.075);border-radius:20px;background:linear-gradient(145deg,rgba(16,33,51,.92),rgba(8,20,33,.92))}
+    .eyebrow{display:block;color:#68b7ff;font-size:10px;font-weight:800;letter-spacing:1.3px;margin-bottom:8px}
+    .jobs-hero h1{font-size:clamp(30px,4vw,46px);line-height:1.08}
+    .jobs-hero p{max-width:850px;margin-top:12px;color:#9badbd;line-height:1.65}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+    .summary-card{padding:17px;border:1px solid rgba(255,255,255,.06);border-radius:13px;background:rgba(255,255,255,.025)}
+    .summary-card span{display:block;color:#6f879b;font-size:9px;text-transform:uppercase;letter-spacing:.8px}.summary-card strong{display:block;margin-top:7px;font-size:25px}
+    .section-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-top:34px;margin-bottom:16px}
+    .section-heading span{color:#70899d;font-size:9px;font-weight:800;letter-spacing:1.4px}.section-heading h2{margin-top:4px;font-size:22px}.section-heading p{color:#72889a;font-size:10px}
+    .job-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .job-card{padding:22px;border:1px solid rgba(255,255,255,.07);border-radius:17px;background:rgba(10,25,40,.82);transition:transform .2s ease,border-color .2s ease}
+    .job-card:hover{transform:translateY(-3px);border-color:rgba(59,158,255,.28)}
+    .job-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}
+    .job-code{display:inline-block;color:#68b7ff;font-size:10px;font-weight:800;letter-spacing:1.1px}.job-card h3{margin-top:8px;font-size:20px;line-height:1.25}
+    .job-card p{margin-top:9px;color:#8399ab;font-size:11px;line-height:1.55}
+    .status-badge{padding:8px 10px;border-radius:8px;font-size:9px;font-weight:800;letter-spacing:.7px;white-space:nowrap;border:1px solid rgba(255,255,255,.08)}
+    .assigned{color:#68b7ff;background:rgba(59,158,255,.08)}.progress{color:#ffd166;background:rgba(255,209,102,.07)}.qa{color:#c798ff;background:rgba(199,152,255,.08)}.returned{color:#f4a261;background:rgba(244,162,97,.08)}.closed{color:#3ddc97;background:rgba(61,220,151,.08)}
+    .meta-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.mini-meta{padding:11px;border:1px solid rgba(255,255,255,.05);border-radius:10px;background:rgba(255,255,255,.02)}.mini-meta span{display:block;color:#687f92;font-size:8px;text-transform:uppercase}.mini-meta strong{display:block;margin-top:5px;font-size:10px}
+    .progress-line{height:7px;margin-top:17px;border-radius:20px;overflow:hidden;background:rgba(255,255,255,.06)}.progress-line span{display:block;height:100%;background:linear-gradient(90deg,#3b9eff,#3ddc97)}
+    .progress-copy{display:flex;justify-content:space-between;gap:10px;margin-top:7px;color:#70879a;font-size:9px}
+    .job-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:19px}.job-open,.job-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 15px;border-radius:10px;text-decoration:none;font-size:10px;font-weight:800}.job-open{color:#fff;background:linear-gradient(135deg,#258ff7,#48aaff)}.job-secondary{color:#b8cad8;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04)}
+    .propeller-card .job-open{background:linear-gradient(135deg,#7458ff,#9a7aff)}.notice{margin-top:22px;padding:16px;border:1px solid rgba(59,158,255,.11);border-radius:12px;background:rgba(59,158,255,.035);color:#839aac;font-size:10px;line-height:1.6}
+    .blocked-access{max-width:700px;margin:80px auto;padding:35px;text-align:center;border:1px solid rgba(244,162,97,.16);border-radius:18px;background:rgba(244,162,97,.04)}.blocked-access p{color:#9badbd;margin-top:10px;line-height:1.6}
+    @media(max-width:950px){.summary-grid{grid-template-columns:repeat(2,1fr)}.job-list{grid-template-columns:1fr}}
+    @media(max-width:600px){.jobs-shell{padding:24px 16px 55px}.summary-grid{grid-template-columns:1fr 1fr}.meta-row{grid-template-columns:1fr}.jobs-topline{align-items:flex-start;flex-direction:column}.job-card-top{flex-direction:column}}
+  </style>
+</head>
+<body class="jobs-page">
+<header class="dashboard-topbar">
+  <a href="index.html" class="brand brand-link">
+    <div class="brand-icon">A</div>
+    <div><h1>AeroMRO</h1><span>AVIATION TRAINING & ANALYSIS PLATFORM</span></div>
+  </a>
+  <div class="dashboard-user">
+    <div class="dashboard-user-info"><strong id="headerUser">User</strong><span id="headerRole">Role</span></div>
+    <div class="user-avatar" id="headerAvatar">U</div>
+  </div>
+</header>
+
+<main class="jobs-shell" id="jobsApp">
+  <div class="jobs-topline">
+    <a class="back-button" href="dashboard.html">← Back to Dashboard</a>
+    <div class="role-pill" id="rolePill">ROLE</div>
+  </div>
+
+  <section class="jobs-hero">
+    <span class="eyebrow">MAINTENANCE WORKSPACE</span>
+    <h1>Job Cards</h1>
+    <p>Select a training job card to continue the AeroMRO workflow. Each card stores its own checklist progress, evidence, QA decision, and audit history in this browser prototype.</p>
+    <div class="summary-grid">
+      <div class="summary-card"><span>Total Job Cards</span><strong>02</strong></div>
+      <div class="summary-card"><span>In Progress</span><strong id="countProgress">0</strong></div>
+      <div class="summary-card"><span>Awaiting QA</span><strong id="countQA">0</strong></div>
+      <div class="summary-card"><span>Closed</span><strong id="countClosed">0</strong></div>
+    </div>
+  </section>
+
+  <div class="section-heading">
+    <div><span>AVAILABLE TASKS</span><h2>Training Job Cards</h2></div>
+    <p id="roleHint">Open a job card to continue.</p>
+  </div>
+
+  <section class="job-list" id="jobList"></section>
+
+  <div class="notice">
+    <strong>Prototype note:</strong> JC-001 demonstrates the original maintenance workflow. JC-002 integrates the RCbenchmark propeller experiment with AeroMRO PropLab. Both are educational training workflows and are not approved aircraft maintenance data.
+  </div>
+</main>
+
+<script>
+const userName = sessionStorage.getItem("aeromro_name");
+const userRole = sessionStorage.getItem("aeromro_role");
+const roleTitle = sessionStorage.getItem("aeromro_role_title");
+const mode = sessionStorage.getItem("aeromro_mode");
+
+if (!userName || !userRole) window.location.href = "login.html?mode=maintenance";
+
+if (mode === "training" || userRole === "student") {
+  document.getElementById("jobsApp").innerHTML = `<div class="blocked-access"><h2>Maintenance Workspace Only</h2><p>Job cards are available to Admin / Planner, Mechanic / AME, and Inspector / QA roles.</p><div class="job-actions" style="justify-content:center;"><a class="job-open" href="dashboard.html">Return to Dashboard</a></div></div>`;
+}
+
+document.getElementById("headerUser").innerText = userName || "User";
+document.getElementById("headerRole").innerText = roleTitle || "Role";
+document.getElementById("headerAvatar").innerText = (userName || "U").charAt(0).toUpperCase();
+if (document.getElementById("rolePill")) document.getElementById("rolePill").innerText = (roleTitle || "ROLE").toUpperCase();
+
+function safeRead(key, fallback) {
+  try { return {...fallback, ...(JSON.parse(localStorage.getItem(key) || "{}"))}; }
+  catch { return fallback; }
+}
+
+function statusClass(status) {
+  if (status === "In Progress") return "progress";
+  if (status === "Awaiting QA") return "qa";
+  if (status === "Returned") return "returned";
+  if (status === "Closed") return "closed";
+  return "assigned";
+}
+
+function actionLabel(status) {
+  if (userRole === "inspector" && status === "Awaiting QA") return "Review for QA →";
+  if (userRole === "admin") return "Open Job Card →";
+  if (status === "Closed") return "View Closed Job →";
+  if (status === "Returned") return "Continue Returned Job →";
+  if (status === "In Progress") return "Continue Job →";
+  return "Open Job Card →";
+}
+
+const jobs = [
+  {
+    id:"JC-001",
+    title:"Fire Detection System Operational Test",
+    description:"Complete a simulated fire-detection trainer operational test, record evidence, and submit the task for QA review.",
+    href:"job-card.html",
+    storage:"aeromro_jc001",
+    icon:"🔥",
+    className:"",
+    fallback:{status:"Assigned",steps:Array(5).fill(false),mechanicName:"",qaDecision:"",evidenceName:""},
+    system:"Fire Protection",
+    asset:"Fire Detection Trainer"
+  },
+  {
+    id:"JC-002",
+    title:"Propeller Static Thrust Performance Test",
+    description:"Perform the supervised RCbenchmark workflow, link the PropLab test result, and submit the experimental record for review.",
+    href:"job-card-002.html",
+    storage:"aeromro_jc002",
+    icon:"⚙",
+    className:"propeller-card",
+    fallback:{status:"Assigned",steps:Array(10).fill(false),mechanicName:"",qaDecision:"",evidenceName:"",linkedTestId:"",propellerId:""},
+    system:"UAV Propulsion",
+    asset:"RCbenchmark Test Stand"
+  }
+];
+
+const states = jobs.map(j => ({...j, state:safeRead(j.storage,j.fallback)}));
+
+if (document.getElementById("countProgress")) {
+  document.getElementById("countProgress").innerText = states.filter(j => ["In Progress","Returned"].includes(j.state.status)).length;
+  document.getElementById("countQA").innerText = states.filter(j => j.state.status === "Awaiting QA").length;
+  document.getElementById("countClosed").innerText = states.filter(j => j.state.status === "Closed").length;
+
+  const roleHint = document.getElementById("roleHint");
+  roleHint.innerText = userRole === "inspector" ? "Open submitted cards to inspect and sign off." : userRole === "admin" ? "Monitor the status of each training workflow." : "Open an assigned card to continue your work.";
+
+  const list = document.getElementById("jobList");
+
+  states.forEach(job => {
+    const completed = (job.state.steps || []).filter(Boolean).length;
+    const total = (job.state.steps || []).length || 1;
+    const percent = Math.round((completed / total) * 100);
+    const extraValue = job.id === "JC-002" ? (job.state.linkedTestId || "Not linked") : (job.state.evidenceName ? "Added" : "Not added");
+    const extraLabel = job.id === "JC-002" ? "PropLab Test" : "Evidence";
+
+    const card = document.createElement("article");
+    card.className = `job-card ${job.className}`;
+    card.innerHTML = `
+      <div class="job-card-top">
+        <div>
+          <span class="job-code">${job.icon} ${job.id}</span>
+          <h3>${job.title}</h3>
+          <p>${job.description}</p>
+        </div>
+        <span class="status-badge ${statusClass(job.state.status)}">${String(job.state.status || "Assigned").toUpperCase()}</span>
+      </div>
+      <div class="meta-row">
+        <div class="mini-meta"><span>System</span><strong>${job.system}</strong></div>
+        <div class="mini-meta"><span>Training Asset</span><strong>${job.asset}</strong></div>
+        <div class="mini-meta"><span>${extraLabel}</span><strong>${extraValue}</strong></div>
+      </div>
+      <div class="progress-line"><span style="width:${percent}%"></span></div>
+      <div class="progress-copy"><span>${completed} / ${total} checklist steps</span><strong>${percent}%</strong></div>
+      <div class="job-actions">
+        <a class="job-open" href="${job.href}">${actionLabel(job.state.status)}</a>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+</script>
+</body>
+</html>
