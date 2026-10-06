@@ -7,7 +7,7 @@
 
     <title>AeroMRO | Dashboard</title>
 
-    <link rel="stylesheet" href="./style.css?v=20260906-3">
+    <link rel="stylesheet" href="./style.css?v=20261006-1">
 </head>
 
 <body class="dashboard-page">
@@ -23,7 +23,7 @@
 
             <div>
                 <h1>AeroMRO</h1>
-                <span>AVIATION TRAINING PLATFORM</span>
+                <span>AVIATION TRAINING & ANALYSIS PLATFORM</span>
             </div>
 
         </a>
@@ -128,6 +128,30 @@
             </div>
 
 
+            <div class="sidebar-menu-section" id="propLabMenu">
+
+                <div class="sidebar-section-label">
+                    PROPLAB
+                </div>
+
+                <button class="sidebar-link" onclick="window.location.href='proplab.html'">
+                    <span>⚙</span>
+                    Performance Analysis
+                </button>
+
+                <button class="sidebar-link" onclick="window.location.href='proplab.html#compareSection'">
+                    <span>⇄</span>
+                    Compare Propellers
+                </button>
+
+                <button class="sidebar-link" onclick="window.location.href='proplab.html#selectionSection'">
+                    <span>✓</span>
+                    UAV Selection
+                </button>
+
+            </div>
+
+
             <div class="sidebar-bottom">
 
                 <button
@@ -217,6 +241,28 @@
                 id="actionGrid"
                 class="dashboard-actions"
             >
+            </section>
+
+
+            <!-- =======================
+                 PROPLAB ACCESS
+            ======================== -->
+            <div class="dashboard-section-title">
+                <div>
+                    <span>EXPERIMENTAL ANALYSIS</span>
+                    <h3>PropLab</h3>
+                </div>
+            </div>
+
+            <section class="dashboard-actions" style="grid-template-columns: 1fr;">
+                <button class="dashboard-action-card" onclick="window.location.href='proplab.html'">
+                    <div class="action-icon">⚙</div>
+                    <div>
+                        <h4>Open Propeller Performance Lab</h4>
+                        <p>Import RCbenchmark data, analyse static thrust performance, compare saved propellers, and apply UAV requirements.</p>
+                    </div>
+                    <span class="action-arrow">→</span>
+                </button>
             </section>
 
 
@@ -885,6 +931,13 @@ const activities = [
         title: "ATA 29 Hydraulic training prepared",
         time: "Today",
         type: "training"
+    },
+
+    {
+        icon: "⚙",
+        title: "PropLab PT-001 analysis available",
+        time: "Today",
+        type: "normal"
     }
 
 ];
