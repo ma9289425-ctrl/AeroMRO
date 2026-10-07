@@ -89,6 +89,7 @@
   <section class="job-hero">
     <div>
       <span class="job-id">JC-001 • TRAINING JOB CARD</span>
+      <div style="margin-top:8px;color:#9badbd;font-size:10px;">Training ID: <strong id="trainingIdLabel">—</strong></div>
       <h1>Fire Detection System Operational Test</h1>
       <p>Simulated maintenance workflow for inspection and functional checking of an aircraft fire-detection training system. This activity is for educational use only.</p>
 
@@ -231,12 +232,32 @@
 </div>
 
 <script>
-const STORAGE_KEY = "aeromro_jc001";
+const LEGACY_STORAGE_KEY = "aeromro_jc001";
 
 const userName = sessionStorage.getItem("aeromro_name");
 const userRole = sessionStorage.getItem("aeromro_role");
 const roleTitle = sessionStorage.getItem("aeromro_role_title");
 const mode = sessionStorage.getItem("aeromro_mode");
+
+const currentTrainingId = (sessionStorage.getItem("aeromro_id") || "UNASSIGNED").trim().toUpperCase();
+const targetParam = new URLSearchParams(window.location.search).get("trainingId");
+const targetTrainingId = (targetParam && ["admin","inspector"].includes(userRole))
+  ? targetParam.trim().toUpperCase()
+  : currentTrainingId;
+function idToken(id){ return String(id || "UNASSIGNED").trim().toUpperCase().replace(/[^A-Z0-9_-]+/g,"_"); }
+function scopedKey(jobId, id){ return `aeromro_${jobId.toLowerCase()}_${idToken(id)}`; }
+function registerCurrentIdentity(){
+  try {
+    const registry = JSON.parse(localStorage.getItem("aeromro_training_registry") || "[]");
+    const record = {id: currentTrainingId, name: userName || "User", role: userRole || "", roleTitle: roleTitle || "", lastSeen: new Date().toISOString()};
+    const existing = registry.find(item => item.id === currentTrainingId);
+    if (existing) Object.assign(existing, record); else registry.push(record);
+    localStorage.setItem("aeromro_training_registry", JSON.stringify(registry));
+  } catch {}
+}
+registerCurrentIdentity();
+
+const STORAGE_KEY = scopedKey("jc001", targetTrainingId);
 
 if (!userName || !userRole) {
   window.location.href = "login.html?mode=maintenance";
@@ -261,6 +282,8 @@ document.getElementById("rolePill").innerText = (roleTitle || "ROLE").toUpperCas
 function defaultJob() {
   return {
     id: "JC-001",
+    trainingId: targetTrainingId,
+    traineeName: targetTrainingId === currentTrainingId ? userName : "",
     status: "Assigned",
     steps: [false,false,false,false,false],
     mechanicNotes: "",
@@ -279,7 +302,18 @@ function defaultJob() {
 function loadJob() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : defaultJob();
+    if (saved) return {...defaultJob(), ...JSON.parse(saved)};
+
+    // One-time migration so your existing JC-001 demo is not lost.
+    if (targetTrainingId === currentTrainingId) {
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacy) {
+        const migrated = {...defaultJob(), ...JSON.parse(legacy), trainingId: targetTrainingId};
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        return migrated;
+      }
+    }
+    return defaultJob();
   } catch {
     return defaultJob();
   }
@@ -383,6 +417,8 @@ function compressImage(file, callback) {
 function saveProgress() {
   if (userRole !== "mechanic") return;
 
+  job.trainingId = targetTrainingId;
+  job.traineeName = job.traineeName || userName;
   job.mechanicNotes = mechanicNotes.value;
   job.mechanicName = userName;
 
@@ -407,6 +443,8 @@ function submitForQA() {
     return;
   }
 
+  job.trainingId = targetTrainingId;
+  job.traineeName = job.traineeName || userName;
   job.mechanicNotes = mechanicNotes.value;
   job.mechanicName = userName;
   job.status = "Awaiting QA";
@@ -470,6 +508,8 @@ function resetDemo() {
   if (!confirm("Reset JC-001 to its initial demo state?")) return;
 
   job = defaultJob();
+  job.trainingId = targetTrainingId;
+  job.traineeName = targetTrainingId === currentTrainingId ? userName : "";
   storeJob();
   render();
 }
@@ -488,7 +528,7 @@ function render() {
   const isMechanic = userRole === "mechanic";
   const isInspector = userRole === "inspector";
   const isAdmin = userRole === "admin";
-  const mechanicCanEdit = isMechanic && ["Assigned","In Progress","Returned"].includes(job.status);
+  const mechanicCanEdit = isMechanic && targetTrainingId === currentTrainingId && ["Assigned","In Progress","Returned"].includes(job.status);
 
   stepChecks.forEach((checkbox,index) => {
     checkbox.checked = Boolean(job.steps[index]);
@@ -501,7 +541,8 @@ function render() {
   evidenceInput.disabled = !mechanicCanEdit;
 
   document.getElementById("mechanicActions").style.display = isMechanic ? "flex" : "none";
-  document.getElementById("assignedTo").innerText = job.mechanicName || (isMechanic ? userName : "Mechanic / AME");
+  document.getElementById("assignedTo").innerText = job.mechanicName || (isMechanic ? userName : (job.traineeName || "Mechanic / AME"));
+  document.getElementById("trainingIdLabel").innerText = job.trainingId || targetTrainingId;
 
   const completed = job.steps.filter(Boolean).length;
   const percent = Math.round((completed / job.steps.length) * 100);
@@ -532,13 +573,13 @@ function render() {
   const qaRemarks = document.getElementById("qaRemarks");
   qaRemarks.value = job.qaRemarks || "";
 
-  const qaEnabled = isInspector && job.status === "Awaiting QA";
+  const qaEnabled = isInspector && targetTrainingId !== "UNASSIGNED" && job.status === "Awaiting QA";
   qaRemarks.disabled = !qaEnabled;
   document.getElementById("approveButton").disabled = !qaEnabled;
   document.getElementById("returnButton").disabled = !qaEnabled;
 
   document.getElementById("qaStatusText").innerText = qaEnabled
-    ? "JC-001 is awaiting QA. Review the completed checklist, mechanic notes, and evidence before making a decision."
+    ? `JC-001 for Training ID ${targetTrainingId} is awaiting QA. Review the completed checklist, mechanic notes, and evidence before making a decision.`
     : `Current job status: ${job.status}. QA action buttons are available only when the mechanic submits the job.`;
 
   document.getElementById("adminControls").style.display = isAdmin ? "flex" : "none";
