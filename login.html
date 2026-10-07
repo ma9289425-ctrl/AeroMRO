@@ -374,6 +374,24 @@
 
             }
 
+            if (!trainingId) {
+
+                alert("Please enter a Training ID.");
+
+                return;
+
+            }
+
+            const normalizedTrainingId = trainingId.trim().toUpperCase();
+
+            if (normalizedTrainingId.length < 2) {
+
+                alert("Please enter a valid Training ID.");
+
+                return;
+
+            }
+
 
 
             sessionStorage.setItem(
@@ -384,8 +402,25 @@
 
             sessionStorage.setItem(
                 "aeromro_id",
-                trainingId
+                normalizedTrainingId
             );
+
+            // Register this trainee so Admin / Inspector views can find
+            // separate records created on this browser prototype.
+            try {
+                const registry = JSON.parse(localStorage.getItem("aeromro_training_registry") || "[]");
+                const existing = registry.find(item => item.id === normalizedTrainingId);
+                const record = {
+                    id: normalizedTrainingId,
+                    name: userName,
+                    role: selectedRole.id,
+                    roleTitle: selectedRole.title,
+                    lastSeen: new Date().toISOString()
+                };
+                if (existing) Object.assign(existing, record);
+                else registry.push(record);
+                localStorage.setItem("aeromro_training_registry", JSON.stringify(registry));
+            } catch {}
 
 
             sessionStorage.setItem(
