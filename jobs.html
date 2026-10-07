@@ -69,6 +69,18 @@
     </div>
   </section>
 
+  <section class="job-card-panel" style="margin-top:20px;padding:18px;">
+    <div class="panel-header" style="padding:0 0 14px;border-bottom:none;">
+      <div><span>TRAINEE RECORDS</span><h3 id="recordHeading">Current trainee</h3></div>
+      <div id="recordCount" style="color:#68b7ff;font-size:10px;font-weight:800;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:8px;">
+      <label for="traineeSelect" style="color:#9badbd;font-size:10px;font-weight:700;">View Training ID</label>
+      <select id="traineeSelect" style="width:100%;padding:12px 13px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(4,13,22,.8);color:#fff;">
+      </select>
+    </div>
+  </section>
+
   <div class="section-heading">
     <div><span>AVAILABLE TASKS</span><h2>Training Job Cards</h2></div>
     <p id="roleHint">Open a job card to continue.</p>
@@ -86,9 +98,9 @@ const userName = sessionStorage.getItem("aeromro_name");
 const userRole = sessionStorage.getItem("aeromro_role");
 const roleTitle = sessionStorage.getItem("aeromro_role_title");
 const mode = sessionStorage.getItem("aeromro_mode");
+const currentTrainingId = (sessionStorage.getItem("aeromro_id") || "UNASSIGNED").trim().toUpperCase();
 
 if (!userName || !userRole) window.location.href = "login.html?mode=maintenance";
-
 if (mode === "training" || userRole === "student") {
   document.getElementById("jobsApp").innerHTML = `<div class="blocked-access"><h2>Maintenance Workspace Only</h2><p>Job cards are available to Admin / Planner, Mechanic / AME, and Inspector / QA roles.</p><div class="job-actions" style="justify-content:center;"><a class="job-open" href="dashboard.html">Return to Dashboard</a></div></div>`;
 }
@@ -98,98 +110,71 @@ document.getElementById("headerRole").innerText = roleTitle || "Role";
 document.getElementById("headerAvatar").innerText = (userName || "U").charAt(0).toUpperCase();
 if (document.getElementById("rolePill")) document.getElementById("rolePill").innerText = (roleTitle || "ROLE").toUpperCase();
 
-function safeRead(key, fallback) {
-  try { return {...fallback, ...(JSON.parse(localStorage.getItem(key) || "{}"))}; }
-  catch { return fallback; }
-}
-
-function statusClass(status) {
-  if (status === "In Progress") return "progress";
-  if (status === "Awaiting QA") return "qa";
-  if (status === "Returned") return "returned";
-  if (status === "Closed") return "closed";
-  return "assigned";
-}
-
-function actionLabel(status) {
-  if (userRole === "inspector" && status === "Awaiting QA") return "Review for QA →";
-  if (userRole === "admin") return "Open Job Card →";
-  if (status === "Closed") return "View Closed Job →";
-  if (status === "Returned") return "Continue Returned Job →";
-  if (status === "In Progress") return "Continue Job →";
-  return "Open Job Card →";
-}
+function idToken(id){ return String(id || "UNASSIGNED").trim().toUpperCase().replace(/[^A-Z0-9_-]+/g,"_"); }
+function scopedKey(jobId,id){ return `aeromro_${jobId.toLowerCase()}_${idToken(id)}`; }
+function safeRead(key, fallback) { try { return {...fallback, ...(JSON.parse(localStorage.getItem(key) || "{}"))}; } catch { return fallback; } }
+function registry(){ try { return JSON.parse(localStorage.getItem("aeromro_training_registry") || "[]").filter(x=>x.id); } catch { return []; } }
+function statusClass(status) { if(status==="In Progress") return "progress"; if(status==="Awaiting QA") return "qa"; if(status==="Returned") return "returned"; if(status==="Closed") return "closed"; return "assigned"; }
+function actionLabel(status) { if(userRole==="inspector"&&status==="Awaiting QA") return "Review for QA →"; if(userRole==="admin") return "Open Job Card →"; if(status==="Closed") return "View Closed Job →"; if(status==="Returned") return "Continue Returned Job →"; if(status==="In Progress") return "Continue Job →"; return "Open Job Card →"; }
 
 const jobs = [
-  {
-    id:"JC-001",
-    title:"Fire Detection System Operational Test",
-    description:"Complete a simulated fire-detection trainer operational test, record evidence, and submit the task for QA review.",
-    href:"job-card.html",
-    storage:"aeromro_jc001",
-    icon:"🔥",
-    className:"",
-    fallback:{status:"Assigned",steps:Array(5).fill(false),mechanicName:"",qaDecision:"",evidenceName:""},
-    system:"Fire Protection",
-    asset:"Fire Detection Trainer"
-  },
-  {
-    id:"JC-002",
-    title:"Propeller Static Thrust Performance Test",
-    description:"Perform the supervised RCbenchmark workflow, link the PropLab test result, and submit the experimental record for review.",
-    href:"job-card-002.html",
-    storage:"aeromro_jc002",
-    icon:"⚙",
-    className:"propeller-card",
-    fallback:{status:"Assigned",steps:Array(10).fill(false),mechanicName:"",qaDecision:"",evidenceName:"",linkedTestId:"",propellerId:""},
-    system:"UAV Propulsion",
-    asset:"RCbenchmark Test Stand"
-  }
+  {id:"JC-001", title:"Fire Detection System Operational Test", description:"Complete a simulated fire-detection trainer operational test, record evidence, and submit the task for QA review.", href:"job-card.html", storageBase:"jc001", icon:"🔥", className:"", fallback:{status:"Assigned",steps:Array(5).fill(false),mechanicName:"",qaDecision:"",evidenceName:""}, system:"Fire Protection", asset:"Fire Detection Trainer"},
+  {id:"JC-002", title:"Propeller Static Thrust Performance Test", description:"Perform the supervised RCbenchmark workflow, link the PropLab test result, and submit the experimental record for review.", href:"job-card-002.html", storageBase:"jc002", icon:"⚙", className:"propeller-card", fallback:{status:"Assigned",steps:Array(10).fill(false),mechanicName:"",qaDecision:"",evidenceName:"",linkedTestId:"",propellerId:""}, system:"UAV Propulsion", asset:"RCbenchmark Test Stand"}
 ];
 
-const states = jobs.map(j => ({...j, state:safeRead(j.storage,j.fallback)}));
+function getCurrentTraineeId(){
+  const select=document.getElementById("traineeSelect");
+  return select?.value || currentTrainingId;
+}
+function currentRecords(id){
+  return jobs.map(j=>({...j,state:safeRead(scopedKey(j.storageBase,id),j.fallback)}));
+}
+function setupTrainees(){
+  const select=document.getElementById("traineeSelect");
+  const isViewer=["admin","inspector"].includes(userRole);
+  const list=registry();
+  if(!list.some(x=>x.id===currentTrainingId) && currentTrainingId!=="UNASSIGNED") list.push({id:currentTrainingId,name:userName,role:userRole,roleTitle});
+  // Only show registered IDs; this keeps each trainee record separate.
+  select.innerHTML="";
+  if(!isViewer){
+    const rec={id:currentTrainingId,name:userName,role:userRole,roleTitle};
+    const opt=document.createElement("option"); opt.value=rec.id; opt.textContent=`${rec.id} — ${rec.name} (Current)`; select.appendChild(opt); select.disabled=true;
+  } else {
+    list.sort((a,b)=>a.id.localeCompare(b.id)).forEach(rec=>{
+      const opt=document.createElement("option"); opt.value=rec.id; opt.textContent=`${rec.id} — ${rec.name || "Trainee"}`; select.appendChild(opt);
+    });
+    if(!select.options.length){ const opt=document.createElement("option"); opt.value=currentTrainingId; opt.textContent=`${currentTrainingId} — ${userName}`; select.appendChild(opt); }
+    select.disabled=select.options.length<=1;
+  }
+  select.value=currentTrainingId;
+  select.addEventListener("change",renderSelectedTrainee);
+}
 
-if (document.getElementById("countProgress")) {
-  document.getElementById("countProgress").innerText = states.filter(j => ["In Progress","Returned"].includes(j.state.status)).length;
-  document.getElementById("countQA").innerText = states.filter(j => j.state.status === "Awaiting QA").length;
-  document.getElementById("countClosed").innerText = states.filter(j => j.state.status === "Closed").length;
-
-  const roleHint = document.getElementById("roleHint");
-  roleHint.innerText = userRole === "inspector" ? "Open submitted cards to inspect and sign off." : userRole === "admin" ? "Monitor the status of each training workflow." : "Open an assigned card to continue your work.";
-
-  const list = document.getElementById("jobList");
-
-  states.forEach(job => {
-    const completed = (job.state.steps || []).filter(Boolean).length;
-    const total = (job.state.steps || []).length || 1;
-    const percent = Math.round((completed / total) * 100);
-    const extraValue = job.id === "JC-002" ? (job.state.linkedTestId || "Not linked") : (job.state.evidenceName ? "Added" : "Not added");
-    const extraLabel = job.id === "JC-002" ? "PropLab Test" : "Evidence";
-
-    const card = document.createElement("article");
-    card.className = `job-card ${job.className}`;
-    card.innerHTML = `
-      <div class="job-card-top">
-        <div>
-          <span class="job-code">${job.icon} ${job.id}</span>
-          <h3>${job.title}</h3>
-          <p>${job.description}</p>
-        </div>
-        <span class="status-badge ${statusClass(job.state.status)}">${String(job.state.status || "Assigned").toUpperCase()}</span>
-      </div>
-      <div class="meta-row">
-        <div class="mini-meta"><span>System</span><strong>${job.system}</strong></div>
-        <div class="mini-meta"><span>Training Asset</span><strong>${job.asset}</strong></div>
-        <div class="mini-meta"><span>${extraLabel}</span><strong>${extraValue}</strong></div>
-      </div>
-      <div class="progress-line"><span style="width:${percent}%"></span></div>
-      <div class="progress-copy"><span>${completed} / ${total} checklist steps</span><strong>${percent}%</strong></div>
-      <div class="job-actions">
-        <a class="job-open" href="${job.href}">${actionLabel(job.state.status)}</a>
-      </div>`;
+function renderSelectedTrainee(){
+  const traineeId=getCurrentTraineeId();
+  const records=currentRecords(traineeId);
+  const allReg=registry();
+  const trainee=allReg.find(x=>x.id===traineeId);
+  document.getElementById("recordHeading").innerText=`${trainee?.name || (traineeId===currentTrainingId?userName:"Trainee")} • ${traineeId}`;
+  document.getElementById("recordCount").innerText=userRole==="inspector"?`${records.filter(r=>r.state.status==="Awaiting QA").length} awaiting QA`:`2 job cards`;
+  const list=document.getElementById("jobList"); list.innerHTML="";
+  records.forEach(job=>{
+    const completed=(job.state.steps||[]).filter(Boolean).length; const total=(job.state.steps||[]).length||1; const percent=Math.round(completed/total*100);
+    const extraValue=job.id==="JC-002"?(job.state.linkedTestId||"Not linked"):(job.state.evidenceName?"Added":"Not added"); const extraLabel=job.id==="JC-002"?"PropLab Test":"Evidence";
+    const card=document.createElement("article"); card.className=`job-card ${job.className}`;
+    const target=`?trainingId=${encodeURIComponent(traineeId)}`;
+    card.innerHTML=`<div class="job-card-top"><div><span class="job-code">${job.icon} ${job.id}</span><h3>${job.title}</h3><p>${job.description}</p></div><span class="status-badge ${statusClass(job.state.status)}">${String(job.state.status||"Assigned").toUpperCase()}</span></div><div class="meta-row"><div class="mini-meta"><span>Training ID</span><strong>${traineeId}</strong></div><div class="mini-meta"><span>System</span><strong>${job.system}</strong></div><div class="mini-meta"><span>${extraLabel}</span><strong>${extraValue}</strong></div></div><div class="progress-line"><span style="width:${percent}%"></span></div><div class="progress-copy"><span>${completed} / ${total} checklist steps</span><strong>${percent}%</strong></div><div class="job-actions"><a class="job-open" href="${job.href}${target}">${actionLabel(job.state.status)}</a></div>`;
     list.appendChild(card);
   });
+  const progress=records.filter(j=>["In Progress","Returned"].includes(j.state.status)).length;
+  const qa=records.filter(j=>j.state.status==="Awaiting QA").length;
+  const closed=records.filter(j=>j.state.status==="Closed").length;
+  document.getElementById("countProgress").innerText=progress;
+  document.getElementById("countQA").innerText=qa;
+  document.getElementById("countClosed").innerText=closed;
 }
+setupTrainees();
+renderSelectedTrainee();
 </script>
 </body>
 </html>
