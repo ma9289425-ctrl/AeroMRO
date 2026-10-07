@@ -95,6 +95,7 @@
   <section class="job-hero">
     <div>
       <span class="job-id">JC-002 • EXPERIMENTAL TRAINING JOB CARD</span>
+      <div style="margin-top:8px;color:#9badbd;font-size:10px;">Training ID: <strong id="trainingIdLabel">—</strong></div>
       <h1>Propeller Static Thrust Performance Test</h1>
       <p>Supervised workflow for identifying a propeller configuration, performing an RCbenchmark static test, analysing the exported measurements in AeroMRO PropLab, and submitting the linked result for review.</p>
 
@@ -229,13 +230,33 @@
 </div>
 
 <script>
-const STORAGE_KEY = "aeromro_jc002";
+const LEGACY_STORAGE_KEY = "aeromro_jc002";
 const PROPLAB_STORAGE_KEY = "aeromro_proplab_tests";
 
 const userName = sessionStorage.getItem("aeromro_name");
 const userRole = sessionStorage.getItem("aeromro_role");
 const roleTitle = sessionStorage.getItem("aeromro_role_title");
 const mode = sessionStorage.getItem("aeromro_mode");
+
+const currentTrainingId = (sessionStorage.getItem("aeromro_id") || "UNASSIGNED").trim().toUpperCase();
+const targetParam = new URLSearchParams(window.location.search).get("trainingId");
+const targetTrainingId = (targetParam && ["admin","inspector"].includes(userRole))
+  ? targetParam.trim().toUpperCase()
+  : currentTrainingId;
+function idToken(id){ return String(id || "UNASSIGNED").trim().toUpperCase().replace(/[^A-Z0-9_-]+/g,"_"); }
+function scopedKey(jobId, id){ return `aeromro_${jobId.toLowerCase()}_${idToken(id)}`; }
+function registerCurrentIdentity(){
+  try {
+    const registry = JSON.parse(localStorage.getItem("aeromro_training_registry") || "[]");
+    const record = {id: currentTrainingId, name: userName || "User", role: userRole || "", roleTitle: roleTitle || "", lastSeen: new Date().toISOString()};
+    const existing = registry.find(item => item.id === currentTrainingId);
+    if (existing) Object.assign(existing, record); else registry.push(record);
+    localStorage.setItem("aeromro_training_registry", JSON.stringify(registry));
+  } catch {}
+}
+registerCurrentIdentity();
+
+const STORAGE_KEY = scopedKey("jc002", targetTrainingId);
 
 if (!userName || !userRole) window.location.href = "login.html?mode=maintenance";
 
@@ -250,7 +271,7 @@ if (document.getElementById("rolePill")) document.getElementById("rolePill").inn
 
 function defaultJob() {
   return {
-    id:"JC-002", status:"Assigned", steps:Array(10).fill(false),
+    id:"JC-002", trainingId:targetTrainingId, traineeName:targetTrainingId === currentTrainingId ? userName : "", status:"Assigned", steps:Array(10).fill(false),
     propellerId:"", diameter:"", pitch:"", motorSetup:"", batterySupply:"", linkedTestId:"",
     mechanicNotes:"", evidenceName:"", evidenceData:"", mechanicName:"", submittedAt:"",
     qaDecision:"", qaRemarks:"", qaName:"", qaAt:"",
@@ -258,7 +279,7 @@ function defaultJob() {
   };
 }
 
-function loadJob(){try{const saved=localStorage.getItem(STORAGE_KEY);return saved?{...defaultJob(),...JSON.parse(saved)}:defaultJob();}catch{return defaultJob();}}
+function loadJob(){try{const saved=localStorage.getItem(STORAGE_KEY);if(saved)return{...defaultJob(),...JSON.parse(saved)};if(targetTrainingId===currentTrainingId){const legacy=localStorage.getItem(LEGACY_STORAGE_KEY);if(legacy){const migrated={...defaultJob(),...JSON.parse(legacy),trainingId:targetTrainingId};localStorage.setItem(STORAGE_KEY,JSON.stringify(migrated));return migrated;}}return defaultJob();}catch{return defaultJob();}}
 function storeJob(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(job));}catch{alert("The browser could not save JC-002. If evidence is large, use a smaller image and try again.");}}
 function nowText(){return new Date().toLocaleString();}
 function addAudit(icon,title,meta){job.audit.unshift({icon,title,meta:`${meta} • ${nowText()}`});}
@@ -288,6 +309,7 @@ if (stepChecks.length) {
 }
 
 function syncFormToJob(){
+  job.trainingId=targetTrainingId; job.traineeName=job.traineeName||userName;
   job.propellerId=propellerId.value.trim(); job.diameter=diameter.value.trim(); job.pitch=pitch.value.trim();
   job.motorSetup=motorSetup.value.trim(); job.batterySupply=batterySupply.value.trim(); job.mechanicNotes=mechanicNotes.value;
 }
@@ -377,14 +399,15 @@ function renderSummaryOnly(){
 function render(){
   if(!document.getElementById("stepList"))return;
   const isMechanic=userRole==="mechanic",isInspector=userRole==="inspector",isAdmin=userRole==="admin";
-  const mechanicCanEdit=isMechanic&&["Assigned","In Progress","Returned"].includes(job.status);
+  const mechanicCanEdit=isMechanic&&targetTrainingId===currentTrainingId&&["Assigned","In Progress","Returned"].includes(job.status);
   stepChecks.forEach((checkbox,index)=>{checkbox.checked=Boolean(job.steps[index]);checkbox.disabled=!mechanicCanEdit;checkbox.closest(".task-step").classList.toggle("completed",checkbox.checked);});
 
   propellerId.value=job.propellerId||"";diameter.value=job.diameter||"";pitch.value=job.pitch||"";motorSetup.value=job.motorSetup||"";batterySupply.value=job.batterySupply||"";mechanicNotes.value=job.mechanicNotes||"";
   [propellerId,diameter,pitch,motorSetup,batterySupply,mechanicNotes,evidenceInput,propTestSelect].forEach(el=>{if(el)el.disabled=!mechanicCanEdit;});
   document.getElementById("testId").value=job.linkedTestId||"";
   document.getElementById("mechanicActions").style.display=isMechanic?"flex":"none";
-  document.getElementById("assignedTo").innerText=job.mechanicName||(isMechanic?userName:"Mechanic / AME");
+  document.getElementById("assignedTo").innerText=job.mechanicName||(isMechanic?userName:(job.traineeName||"Mechanic / AME"));
+  document.getElementById("trainingIdLabel").innerText=job.trainingId||targetTrainingId;
 
   const completed=job.steps.filter(Boolean).length,percent=Math.round(completed/job.steps.length*100);
   document.getElementById("progressPercent").innerText=`${percent}%`;document.getElementById("progressCount").innerText=`${completed} / ${job.steps.length} steps`;document.getElementById("progressBar").style.width=`${percent}%`;
@@ -399,7 +422,7 @@ function render(){
   document.getElementById("adminControls").style.display=isAdmin?"flex":"none";document.getElementById("submitButton").disabled=!mechanicCanEdit;
 
   refreshPropLabTests();renderAudit();
-  if(job.status==="Returned"&&isMechanic&&job.qaRemarks){let notice=document.getElementById("qaReturnNotice");if(!notice){notice=document.createElement("div");notice.id="qaReturnNotice";notice.className="sim-banner";notice.style.marginBottom="18px";document.querySelector(".step-list").before(notice);}notice.innerHTML=`<div>↩</div><div><strong>RETURNED BY QA</strong><p>${escapeHtml(job.qaRemarks)}</p></div>`;}else{const n=document.getElementById("qaReturnNotice");if(n)n.remove();}
+  if(job.status==="Returned"&&isMechanic&&targetTrainingId===currentTrainingId&&job.qaRemarks){let notice=document.getElementById("qaReturnNotice");if(!notice){notice=document.createElement("div");notice.id="qaReturnNotice";notice.className="sim-banner";notice.style.marginBottom="18px";document.querySelector(".step-list").before(notice);}notice.innerHTML=`<div>↩</div><div><strong>RETURNED BY QA</strong><p>${escapeHtml(job.qaRemarks)}</p></div>`;}else{const n=document.getElementById("qaReturnNotice");if(n)n.remove();}
 }
 
 function renderAudit(){const list=document.getElementById("auditList");list.innerHTML="";(job.audit||[]).forEach(item=>{const row=document.createElement("div");row.className="audit-item";row.innerHTML=`<div class="audit-icon">${item.icon}</div><div><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.meta)}</span></div>`;list.appendChild(row);});}
